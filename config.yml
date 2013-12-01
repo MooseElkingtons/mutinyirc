@@ -1,0 +1,22 @@
+config:
+    nick: "MutinyIRC"
+    server: "irc.esper.net"
+    port: 6667
+  # uncomment this if there is a pass required.
+  # pass: "secretpasswordhere"
+    message_interval: 750
+    command_prefix: "."
+    channels:
+        - "#mutinyirc"
+
+irc-to-game:
+  # Comment the prefix/suffix out if it is unwanted.
+    prefix: "&5[IRC]&7 "
+    suffix: "&f: "
+    send_colors: true
+
+game-to-irc:
+  # Comment the prefix/suffix out if it is unwanted.
+    prefix: "<"
+    suffix: "> "
+    send_colors: true
