@@ -8,6 +8,7 @@ config:
     command_prefix: "."
     channels:
         - "#mutinyirc"
+    verbose: true
 
 irc-to-game:
   # Comment the prefix/suffix out if it is unwanted.

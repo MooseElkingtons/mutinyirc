@@ -53,7 +53,7 @@ public class GameListener extends IRCListener implements Listener {
 						plist += "No players online.";
 					else {
 						for(Player p : players)
-							plist += p.getDisplayName()+", ";
+							plist +=p.getDisplayName()+ChatUtil.IRC_RESET+", ";
 						plist = plist.substring(0, plist.lastIndexOf(','));
 					}
 					getIRC().sendMessage(channel, plist);
@@ -87,6 +87,8 @@ public class GameListener extends IRCListener implements Listener {
 					ChatUtil.stripIrcColors(message));
 		for(Player p : getPlugin().getServer().getOnlinePlayers())
 			p.sendMessage(msg);
+		if(getPlugin().isVerbose())
+			getPlugin().getServer().getConsoleSender().sendMessage(msg);
 	}
 	
 	public void sendGameMessageToIrc(String message) {

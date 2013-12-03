@@ -54,7 +54,8 @@ public class ChatUtil {
 	
 	public static String ircToGameColors(String message) {
 		return message
-					.replaceAll("^[\u00030]", "\u00030")
+					.replaceAll("\u0003(?=[2-9])", "\u00030")
+					.replaceAll("[\u0003]\\d+\\,[\\d][\\d]", "")
 					.replace(IRC_COLOR_WHITE, GAME_COLOR_WHITE)
 					.replace(IRC_COLOR_BLACK, GAME_COLOR_BLACK)
 					.replace(IRC_COLOR_BLUE, GAME_COLOR_BLUE)
@@ -66,6 +67,7 @@ public class ChatUtil {
 					.replace(IRC_COLOR_YELLOW, GAME_COLOR_YELLOW)
 					.replace(IRC_COLOR_GREEN, GAME_COLOR_GREEN)
 					.replace(IRC_COLOR_DAQUA, GAME_COLOR_DAQUA)
+					.replace(IRC_COLOR_AQUA, GAME_COLOR_AQUA)
 					.replace(IRC_COLOR_DBLUE, GAME_COLOR_DBLUE)
 					.replace(IRC_COLOR_PINK, GAME_COLOR_PINK)
 					.replace(IRC_COLOR_DGRAY, GAME_COLOR_DGRAY)
@@ -87,6 +89,7 @@ public class ChatUtil {
 					.replace(GAME_COLOR_YELLOW, IRC_COLOR_YELLOW)
 					.replace(GAME_COLOR_GREEN, IRC_COLOR_GREEN)
 					.replace(GAME_COLOR_DAQUA, IRC_COLOR_DAQUA)
+					.replace(GAME_COLOR_AQUA, IRC_COLOR_AQUA)
 					.replace(GAME_COLOR_DBLUE, IRC_COLOR_DBLUE)
 					.replace(GAME_COLOR_PINK, IRC_COLOR_PINK)
 					.replace(GAME_COLOR_DGRAY, IRC_COLOR_DGRAY)
@@ -101,8 +104,10 @@ public class ChatUtil {
 
 	public static String stripIrcColors(String message) {
 		return message
-					.replaceAll("^[\u00030]", "\u00030")
-					.replaceAll("\u0003[\\d]\\d", "")
+					.replaceAll("\u0003(?=[2-9])", "\u00030")
+					.replaceAll("[\u0003]\\d+\\,[\\d][\\d]", "")
+					.replaceAll("\u0003[\\d]", "")
+					.replace("\u0003", "")
 					.replace("\u0002", "")
 					.replace("\u001F", "")
 					.replace("\u000F", "");

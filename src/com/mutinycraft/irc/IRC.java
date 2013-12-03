@@ -1,12 +1,13 @@
 package com.mutinycraft.irc;
 
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
-import com.mutinycraft.irc.IRCUser.CMode;
-import com.mutinycraft.irc.plugin.GameListener;
-import com.mutinycraft.irc.plugin.Plugin;
+import com.mutinycraft.irc.io.*;
+import com.mutinycraft.irc.IRCUser.*;
+import com.mutinycraft.irc.plugin.*;
 
 /**
  * RFC-2812 compliant IRC bridge.
@@ -22,8 +23,9 @@ public class IRC {
 	private Plugin plugin;
 	private List<IRCListener> listeners = new ArrayList<IRCListener>();
 	private HashMap<String, IRCUser> bufferNam = new HashMap<String, IRCUser>();
+	private Socket socket = null;
+	private Thread input = null, output = null;
 	
-	private boolean isConnected = false;
 	private String nick = "MutinyIRC";
 	private String pass = null;
 	private String server = "";
@@ -39,7 +41,6 @@ public class IRC {
 		this.registerIRCListener(gl);
 		plugin.getServer().getPluginManager().registerEvents(gl, plugin);
 	}
-	
 	
 	/**
 	 * Joins an IRC channel.
@@ -88,7 +89,7 @@ public class IRC {
 	 * @param rawLine The raw line to send to IRC.
 	 */
 	public void sendRaw(String rawLine) {
-		if(!isConnected)
+		if(!isConnected())
 			return;
 		queue.add(rawLine);
 	}
@@ -96,11 +97,20 @@ public class IRC {
 	/**
 	 * Disconnect/quits from IRC.
 	 */
-	public void quit() {
-		if(!isConnected)
+	public void disconnect() {
+		if(!isConnected())
 			return;
-		queue.add("QUIT :MutinyIRC Bukkit Plugin by MutinyCraft (Developed by MooseElkingtons).");
-		isConnected = false;
+		try {
+			socket.close();
+			socket = null;
+			input = null;
+			output = null;
+			for(IRCListener l : listeners)
+				l.onDisconnect();
+		} catch(Exception e) {
+			plugin.getLogger().log(Level.SEVERE, "Encountered an error while "
+					+ "disconnecting from IRC.", e);
+		}
 	}
 	
 	/**
@@ -108,7 +118,26 @@ public class IRC {
 	 * @return whether or not the IRC bridge is connected to any IRC server.
 	 */
 	public boolean isConnected() {
-		return isConnected;
+		return socket != null && socket.isConnected();
+	}
+	
+	/**
+	 * Connects the IRC bridge to specified socket.
+	 * 
+	 * @param socket the socket for the IRC bridge to connect to.
+	 */
+	public void connect(Socket socket) {
+		if(isConnected())
+			return;
+		this.socket = socket;
+		server = socket.getInetAddress().getHostAddress();
+		port = socket.getPort();
+		input = new Thread(new IRCInputThread(plugin, socket, this));
+		output = new Thread(new IRCOutputThread(plugin, socket, this));
+		input.start();
+		output.start();
+		for(IRCListener l : listeners)
+			l.onConnect();
 	}
 	
 	public List<String> getChannels() {
@@ -138,7 +167,7 @@ public class IRC {
 	 * @param nick
 	 */
 	public void setNick(String nick) {
-		if(isConnected)
+		if(isConnected())
 			queue.add("NICK "+nick);
 		this.nick = nick;
 	}
@@ -217,7 +246,6 @@ public class IRC {
 		
 		@Override
 		public void onConnect() {
-			isConnected = true;
 			String message = "";
 			if(pass != null && !pass.isEmpty())
 				message += "PASS "+pass+"\r\n";
