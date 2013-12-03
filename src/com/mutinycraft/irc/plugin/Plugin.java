@@ -6,6 +6,7 @@ import java.util.logging.*;
 
 import org.bukkit.plugin.java.*;
 
+import com.mutinycraft.irc.ExtensionLoader;
 import com.mutinycraft.irc.IRC;
 
 public class Plugin extends JavaPlugin {
@@ -19,6 +20,8 @@ public class Plugin extends JavaPlugin {
 	public void onEnable() {
 		irc = new IRC(this);
 		loadConfig();
+		ExtensionLoader eload = new ExtensionLoader(irc, this);
+		eload.load();
 		getLogger().log(Level.INFO, "Starting IRC connection.");
 		try {
 			Socket socket = new Socket(server, port);

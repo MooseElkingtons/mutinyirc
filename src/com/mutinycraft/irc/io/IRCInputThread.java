@@ -7,6 +7,12 @@ import java.util.logging.Level;
 import com.mutinycraft.irc.*;
 import com.mutinycraft.irc.plugin.*;
 
+/**
+ * Handles Incoming data from IRC.
+ * 
+ * @author MooseElkingtons
+ */
+
 public class IRCInputThread implements Runnable {
 
 	private Plugin plugin;
@@ -36,7 +42,7 @@ public class IRCInputThread implements Runnable {
 					for(IRCListener l : irc.getIRCListeners())
 						l.onServerResponse(Integer.parseInt(split[1]),
 								response);
-				
+								
 				if(split[0].equalsIgnoreCase("PING"))
 					for(IRCListener l : irc.getIRCListeners())
 						l.onPing(response);
@@ -77,8 +83,26 @@ public class IRCInputThread implements Runnable {
 					String sender = i.substring(1, i.indexOf("!"));
 					String recipient = split[2];
 					String message = i.substring(i.indexOf(':', 2) + 1);
-					for(IRCListener l : irc.getIRCListeners())
-						l.onMessage(sender, recipient, message);
+					
+					
+					if(message.startsWith("\u0001")) {
+						String ctcp = message.substring(1,
+								message.lastIndexOf("\u0001"));
+						switch(ctcp.split(" ")[0].toUpperCase()) {
+							case "ACTION":
+								for(IRCListener l : irc.getIRCListeners())
+									l.onAction(sender, recipient,
+											ctcp.substring(
+													ctcp.indexOf(" ") + 1));
+								break;
+								
+							default:
+								for(IRCListener l : irc.getIRCListeners())
+									l.onCTCP(sender, ctcp);
+						}
+					} else
+						for(IRCListener l : irc.getIRCListeners())
+							l.onMessage(sender, recipient, message);
 				}
 				
 				if(split[1].equalsIgnoreCase("MODE")) {

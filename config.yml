@@ -10,14 +10,31 @@ config:
         - "#mutinyirc"
     verbose: true
 
-irc-to-game:
-  # Comment the prefix/suffix out if it is unwanted.
-    prefix: "&5[IRC]&7 "
-    suffix: "&f: "
+irc_to_game:
+    prefix:
+        message: "§d[IRC]§7 "
+        action: "§d[IRC] §7* "
+    suffix:
+        message: "§r: "
+        action: ""
     send_colors: true
+    relay_actions: true
 
-game-to-irc:
-  # Comment the prefix/suffix out if it is unwanted.
-    prefix: "<"
-    suffix: "> "
+game_to_irc:
+    prefix:
+        message: "<"
+        action: "* "
+    suffix:
+        message: "> "
+        action: ""
+
     send_colors: true
+    relay_actions: true
+
+
+# ## IGNORE EVERYTHING BELOW IF YOU ## #
+# ## DO NOT KNOW WHAT YOU ARE DOING ## #
+
+advanced:
+    listeners:
+        - "DefaultChatHandler"

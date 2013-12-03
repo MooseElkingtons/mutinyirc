@@ -119,6 +119,16 @@ public abstract class IRCListener {
 	}
 	
 	/**
+	 * Listens for Client-to-Client protocol (CTCP) queries.
+	 * 
+	 * @param sender The sender of the CTCP query
+	 * @param ctcp The query string.
+	 */
+	public void onCTCP(String sender, String ctcp) {
+		
+	}
+	
+	/**
 	 * listens for a ping sent from the IRC server.
 	 * 
 	 * @param response PING parameters.

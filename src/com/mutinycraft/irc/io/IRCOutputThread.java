@@ -7,6 +7,11 @@ import java.util.logging.Level;
 import com.mutinycraft.irc.*;
 import com.mutinycraft.irc.plugin.*;
 
+/**
+ * Handles outgoing data to IRC.
+ * 
+ * @author MooseElkingtons
+ */
 public class IRCOutputThread implements Runnable {
 
 	private Plugin plugin;

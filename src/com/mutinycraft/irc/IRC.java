@@ -37,7 +37,7 @@ public class IRC {
 	public IRC(Plugin plugin) {
 		this.plugin = plugin;
 		this.registerIRCListener(new ControlListener(this, plugin));
-		GameListener gl = new GameListener(this, plugin);
+		IRCCommandListener gl = new IRCCommandListener(this, plugin);
 		this.registerIRCListener(gl);
 		plugin.getServer().getPluginManager().registerEvents(gl, plugin);
 	}
@@ -63,7 +63,17 @@ public class IRC {
 	 * @param action The action to send.
 	 */
 	public void sendAction(String recipient, String action) {
-		sendRaw("ACTION "+recipient+" :"+action);
+		sendCTCP(recipient, "ACTION "+action);
+	}
+	
+	/**
+	 * Sends a notice to the recipient. Used for CTCP responses.
+	 * 
+	 * @param recipient The receiver of the notice.
+	 * @param message The notice to send.
+	 */
+	public void sendNotice(String recipient, String message) {
+		sendRaw("NOTICE "+recipient+" :"+message);
 	}
 	
 	/**
@@ -92,6 +102,16 @@ public class IRC {
 		if(!isConnected())
 			return;
 		queue.add(rawLine);
+	}
+	
+	/**
+	 * Sends Client-to-Client Protocol (CTCP) query to specified recipient.
+	 * 
+	 * @param recipient The recipient of the CTCP query
+	 * @param ctcp The CTCP message
+	 */
+	public void sendCTCP(String recipient, String ctcp) {
+		sendRaw("PRIVMSG "+recipient+" :\u000001"+ctcp+"\u000001");
 	}
 	
 	/**
@@ -293,6 +313,27 @@ public class IRC {
 					if(u.getNick().equalsIgnoreCase(oldNick))
 						u.setNick(newNick);
 				}
+			}
+		}
+		
+		@Override
+		public void onCTCP(String sender, String ctcp) {
+			String cmd = ctcp.split(" ")[0].toUpperCase();
+			switch(cmd) {
+				case "VERSION":
+					getIRC().sendNotice(sender, "VERSION MutinyIRC "
+							+ "Bridge Plugin by MutinyCraft - http://github."
+							+ "com/MooseElkingtons/MutinyIRC (Developed by M"
+							+ "ooseElkingtons)");
+					break;
+					
+				case "PING":
+					String[] crps = ctcp.split(" ");
+					String pres = "PING";
+					if(crps.length > 1)
+						pres += " "+crps[1];
+					getIRC().sendNotice(sender, pres);
+				break;
 			}
 		}
 
