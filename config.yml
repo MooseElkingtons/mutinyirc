@@ -9,14 +9,18 @@ config:
     channels:
         - "#mutinyirc"
     verbose: true
+  # startup_commands:
+  #     - "PRIVMSG NickServ :identify MutinyIRC secretpassword"
 
 irc_to_game:
     prefix:
         message: "§d[IRC]§7 "
         action: "§d[IRC] §7* "
+        nick: "§d[IRC] §7* "
     suffix:
         message: "§r: "
         action: ""
+        nick: ""
     send_colors: true
     relay_actions: true
 

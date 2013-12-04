@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
+import org.bukkit.configuration.file.FileConfiguration;
+
 import com.mutinycraft.irc.io.*;
 import com.mutinycraft.irc.IRCUser.*;
 import com.mutinycraft.irc.plugin.*;
@@ -33,13 +35,22 @@ public class IRC {
 	private int triedNicks = 0;
 	private HashMap<String, List<IRCUser>> channels = new HashMap<String,
 			List<IRCUser>>();
+	private List<String> loadship = new ArrayList<String>();
 	
 	public IRC(Plugin plugin) {
 		this.plugin = plugin;
+		loadStartupCommands();
+		
 		this.registerIRCListener(new ControlListener(this, plugin));
 		IRCCommandListener gl = new IRCCommandListener(this, plugin);
 		this.registerIRCListener(gl);
 		plugin.getServer().getPluginManager().registerEvents(gl, plugin);
+	}
+	
+	public void loadStartupCommands() {
+		FileConfiguration cfg = plugin.getConfig();
+		if(cfg.contains("config.startup_commands"))
+			loadship.addAll(cfg.getStringList("config.startup_commands"));
 	}
 	
 	/**
@@ -389,6 +400,11 @@ public class IRC {
 					channels.put(channel, new ArrayList<IRCUser>(bufferNam.values()));
 					bufferNam.clear();
 					break;
+					
+				case ReplyConstants.RPL_WELCOME:
+					for(String scm : loadship)
+						sendRaw(scm);
+					break;
 				
 				case ReplyConstants.ERR_ERRONEOUSNICKNAME:
 				case ReplyConstants.ERR_NICKCOLLISION:
@@ -406,17 +422,17 @@ public class IRC {
 				
 				case ReplyConstants.ERR_ALREADYREGISTERED:
 					plugin.getLogger().log(Level.SEVERE, "ERR_ALREADYREGISTER"
-											+ "ED: "+response);
+											+ "ED "+response);
 					break;
 				
 				case ReplyConstants.ERR_BADCHANNELKEY:
-					plugin.getLogger().log(Level.SEVERE, "ERR_BADCHANNELKEY: "+
+					plugin.getLogger().log(Level.SEVERE, "ERR_BADCHANNELKEY "+
 										response);
 					break;
 				
 				case ReplyConstants.ERR_INVITEONLYCHAN:
-					plugin.getLogger().log(Level.SEVERE, "ERR_INVITEONLYCHAN:"+
-											" "+response);
+					plugin.getLogger().log(Level.SEVERE, "ERR_INVITEONLYCHAN "
+										+ response);
 					break;
 				
 			}

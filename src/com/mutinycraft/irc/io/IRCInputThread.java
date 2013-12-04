@@ -42,7 +42,7 @@ public class IRCInputThread implements Runnable {
 					for(IRCListener l : irc.getIRCListeners())
 						l.onServerResponse(Integer.parseInt(split[1]),
 								response);
-								
+
 				if(split[0].equalsIgnoreCase("PING"))
 					for(IRCListener l : irc.getIRCListeners())
 						l.onPing(response);
@@ -83,8 +83,6 @@ public class IRCInputThread implements Runnable {
 					String sender = i.substring(1, i.indexOf("!"));
 					String recipient = split[2];
 					String message = i.substring(i.indexOf(':', 2) + 1);
-					
-					
 					if(message.startsWith("\u0001")) {
 						String ctcp = message.substring(1,
 								message.lastIndexOf("\u0001"));
