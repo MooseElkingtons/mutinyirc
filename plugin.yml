@@ -2,5 +2,5 @@ name: MutinyIRC
 version: 1.0
 main: com.mutinycraft.irc.plugin.Plugin
 author: MooseElkingtons
-load: STARTUP
 description: extensible IRC plugin which only includes the bare essentials.
+softdepend: ['MChat']

@@ -58,7 +58,7 @@ public class Plugin extends JavaPlugin {
 	
 	public void loadHandlers() throws IllegalArgumentException {
 		FileConfiguration cfg = getConfig();
-		listeners.addAll(cfg.getStringList("advanced.listeners"));
+		listeners.addAll(cfg.getStringList("advanced.handlers"));
 		for(String s : listeners) {
 			switch(s) {
 				case "DefaultChatHandler":

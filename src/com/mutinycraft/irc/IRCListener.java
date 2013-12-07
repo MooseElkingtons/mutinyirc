@@ -79,10 +79,10 @@ public abstract class IRCListener {
 	 * listens for messages.
 	 * 
 	 * @param sender The user which sent the message.
-	 * @param recipient The channel/user the message was relayed to.
+	 * @param channel The channel the message was relayed to.
 	 * @param message The message sent by the user.
 	 */
-	public void onMessage(String sender, String recipient, String message) {
+	public void onMessage(String sender, String channel, String message) {
 		
 	}
 	

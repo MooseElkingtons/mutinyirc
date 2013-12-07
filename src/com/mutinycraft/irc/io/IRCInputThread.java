@@ -49,7 +49,7 @@ public class IRCInputThread implements Runnable {
 				
 				if(split[1].equalsIgnoreCase("NICK")) {
 					String oldnick = i.substring(1, i.indexOf("!"));
-					String newnick = split[2];
+					String newnick = split[2].substring(1);
 					for(IRCListener l : irc.getIRCListeners())
 						l.onNick(oldnick, newnick);
 				}
@@ -83,24 +83,29 @@ public class IRCInputThread implements Runnable {
 					String sender = i.substring(1, i.indexOf("!"));
 					String recipient = split[2];
 					String message = i.substring(i.indexOf(':', 2) + 1);
-					if(message.startsWith("\u0001")) {
-						String ctcp = message.substring(1,
-								message.lastIndexOf("\u0001"));
-						switch(ctcp.split(" ")[0].toUpperCase()) {
-							case "ACTION":
-								for(IRCListener l : irc.getIRCListeners())
-									l.onAction(sender, recipient,
-											ctcp.substring(
+					if(recipient.startsWith("#") ||
+							recipient.startsWith("&") ||
+							recipient.startsWith("+") ||
+							recipient.startsWith("!")) {
+						if(message.startsWith("\u0001")) {
+							String ctcp = message.substring(1,
+									message.lastIndexOf("\u0001"));
+							switch(ctcp.split(" ")[0].toUpperCase()) {
+								case "ACTION":
+									for(IRCListener l : irc.getIRCListeners())
+										l.onAction(sender, recipient, ctcp
+												.substring(
 													ctcp.indexOf(" ") + 1));
-								break;
-								
-							default:
-								for(IRCListener l : irc.getIRCListeners())
-									l.onCTCP(sender, ctcp);
-						}
-					} else
-						for(IRCListener l : irc.getIRCListeners())
-							l.onMessage(sender, recipient, message);
+									break;
+									
+								default:
+									for(IRCListener l : irc.getIRCListeners())
+										l.onCTCP(sender, ctcp);
+							}
+						} else
+							for(IRCListener l : irc.getIRCListeners())
+								l.onMessage(sender, recipient, message);
+					}
 				}
 				
 				if(split[1].equalsIgnoreCase("MODE")) {

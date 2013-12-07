@@ -2,7 +2,6 @@ config:
     nick: "MutinyIRC"
     server: "irc.esper.net"
     port: 6667
-  # uncomment this if there is a pass required.
   # pass: "secretpasswordhere"
     message_interval: 750
     command_prefix: "."
@@ -13,32 +12,40 @@ config:
   #     - "PRIVMSG NickServ :identify MutinyIRC secretpassword"
 
 irc_to_game:
-    prefix:
-        message: "§d[IRC]§7 "
-        action: "§d[IRC] §7* "
-        nick: "§d[IRC] §7* "
-    suffix:
-        message: "§r: "
-        action: ""
-        nick: ""
-    send_colors: true
-    relay_actions: true
+    prefix: "&d[IRC]&7 "
+    messages:
+        join: "%user% has joined %channel%"
+        part: "%user% has left %channel%"
+        kick: "%user% was kicked by %kicker%"
+        msg: "%user%: %msg%"
+        nick: "%oldnick% is now known as %newnick%"
+        me: "* %user% %action%"
+    relay:
+        join: true
+        part: true
+        kick: false
+        msg: true
+        nick: true
+        me: true
+        color: true
 
 game_to_irc:
-    prefix:
-        message: "<"
-        action: "* "
-    suffix:
-        message: "> "
-        action: ""
-
-    send_colors: true
-    relay_actions: true
-
-
-# ## IGNORE EVERYTHING BELOW IF YOU ## #
-# ## DO NOT KNOW WHAT YOU ARE DOING ## #
+    prefix: ""
+    name_format: "%dname%" 
+    messages:
+        join: "%nf%&r has joined."
+        part: "%nf%&r has left."
+        kick: "%nf%&r was kicked (%reason%)."
+        msg: "<%nf%&r> %msg%"
+        me: "* %nf%&r %action%"
+    relay:
+        join: true
+        part: true
+        kick: true
+        msg: true
+        me: true
+        color: true
 
 advanced:
-    listeners:
+    handlers:
         - "DefaultChatHandler"

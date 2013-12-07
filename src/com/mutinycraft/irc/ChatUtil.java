@@ -22,7 +22,7 @@ public class ChatUtil {
 	public static final String IRC_COLOR_DBLUE  = "\u000312";
 	public static final String IRC_COLOR_PINK   = "\u000313";
 	public static final String IRC_COLOR_DGRAY  = "\u000314";
-	public static final String IRC_COLOR_GRAY   = "\u000314";
+	public static final String IRC_COLOR_GRAY   = "\u000315";
 	
 	public static final String GAME_COLOR_WHITE  = "§f";
 	public static final String GAME_COLOR_BLACK  = "§0";
@@ -54,8 +54,9 @@ public class ChatUtil {
 	
 	public static String ircToGameColors(String message) {
 		return message
-					.replaceAll("\u0003(?=[2-9])", "\u00030")
-					.replaceAll("[\u0003]\\d+\\,[\\d][\\d]", "")
+					.replaceAll("\u0003(?=[0-9])[(?=\\w)]", "\u0003")
+					.replaceAll("[\u0003]\\d+\\,[\\d+]", "")
+					.replaceAll("\u0003(?=\\w)", GAME_RESET)
 					.replace(IRC_COLOR_WHITE, GAME_COLOR_WHITE)
 					.replace(IRC_COLOR_BLACK, GAME_COLOR_BLACK)
 					.replace(IRC_COLOR_BLUE, GAME_COLOR_BLUE)
@@ -107,6 +108,8 @@ public class ChatUtil {
 					.replaceAll("\u0003(?=[2-9])", "\u00030")
 					.replaceAll("[\u0003]\\d+\\,[\\d][\\d]", "")
 					.replaceAll("\u0003[\\d]", "")
+					.replaceAll("\u0003(?=[0-1])[(?=\\w)]", "")
+					.replaceAll("\u0003(?=\\w)", "")
 					.replace("\u0003", "")
 					.replace("\u0002", "")
 					.replace("\u001F", "")
@@ -115,6 +118,16 @@ public class ChatUtil {
 	
 	public static String stripGameColors(String message) {
 		return message.replaceAll("\\§[\\w]", "");
+	}
+	
+	/**
+	 * Replaces ampersands with squigglies.
+	 * 
+	 * @param message The message to correct
+	 * @return The corrected message
+	 */
+	public static String correctCC(String message) {
+		return message.replace("&", "§");
 	}
 
 }

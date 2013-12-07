@@ -5,8 +5,11 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.Level;
 
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
+import com.miraclem4n.mchat.api.Reader;
 import com.mutinycraft.irc.io.*;
 import com.mutinycraft.irc.IRCUser.*;
 import com.mutinycraft.irc.plugin.*;
@@ -21,6 +24,17 @@ public class IRC {
 	
 	public ConcurrentLinkedQueue<String> queue =
 			new ConcurrentLinkedQueue<String>();
+	
+	private HashMap<String, String>
+		ircMsgs = new HashMap<String, String>(),
+		gameMsgs = new HashMap<String, String>();
+	private HashMap<String, Boolean>
+		ircRelays = new HashMap<String, Boolean>(),
+		gameRelays = new HashMap<String, Boolean>();
+	private String cmdPrefix = ".", ircPrefix = "",
+					gamePrefix = "", nameFormat = "";
+	private boolean isMchatEnabled;
+
 	
 	private Plugin plugin;
 	private List<IRCListener> listeners = new ArrayList<IRCListener>();
@@ -40,17 +54,85 @@ public class IRC {
 	public IRC(Plugin plugin) {
 		this.plugin = plugin;
 		loadStartupCommands();
-		
+		loadConfig();
 		this.registerIRCListener(new ControlListener(this, plugin));
 		IRCCommandListener gl = new IRCCommandListener(this, plugin);
 		this.registerIRCListener(gl);
 		plugin.getServer().getPluginManager().registerEvents(gl, plugin);
+
 	}
 	
 	public void loadStartupCommands() {
+		loadship.clear();
 		FileConfiguration cfg = plugin.getConfig();
 		if(cfg.contains("config.startup_commands"))
 			loadship.addAll(cfg.getStringList("config.startup_commands"));
+	}
+	
+	public void loadConfig() {
+		gameMsgs.clear();
+		ircMsgs.clear();
+		gameRelays.clear();
+		ircRelays.clear();
+		FileConfiguration cfg = plugin.getConfig();
+		String imsg = "irc_to_game.messages.";
+		gameMsgs.put("join",
+				ChatUtil.ircToGameColors(ChatUtil.correctCC(
+						cfg.getString(imsg+"join"))));
+		gameMsgs.put("part",
+				ChatUtil.ircToGameColors(ChatUtil.correctCC(
+						cfg.getString(imsg+"part"))));
+		gameMsgs.put("kick",
+				ChatUtil.ircToGameColors(ChatUtil.correctCC(
+						cfg.getString(imsg+"kick"))));
+		gameMsgs.put("msg",
+				ChatUtil.ircToGameColors(ChatUtil.correctCC(
+						cfg.getString(imsg+"msg"))));
+		gameMsgs.put("nick",
+				ChatUtil.ircToGameColors(ChatUtil.correctCC(
+						cfg.getString(imsg+"nick"))));
+		gameMsgs.put("me",
+				ChatUtil.ircToGameColors(ChatUtil.correctCC(
+						cfg.getString(imsg+"me"))));
+		
+		String gmsg = "game_to_irc.messages.";
+		ircMsgs.put("join", ChatUtil.gameToIrcColors(
+				ChatUtil.correctCC(cfg.getString(gmsg+"join"))));
+		ircMsgs.put("part", ChatUtil.gameToIrcColors(
+				ChatUtil.correctCC(cfg.getString(gmsg+"part"))));
+		ircMsgs.put("kick", ChatUtil.gameToIrcColors(
+				ChatUtil.correctCC(cfg.getString(gmsg+"kick"))));
+		ircMsgs.put("msg", ChatUtil.gameToIrcColors(
+				ChatUtil.correctCC(cfg.getString(gmsg+"msg"))));
+		ircMsgs.put("me", ChatUtil.gameToIrcColors(
+				ChatUtil.correctCC(cfg.getString(gmsg+"me"))));
+
+		String irel = "irc_to_game.relay.";
+		gameRelays.put("join", cfg.getBoolean(irel+"join"));
+		gameRelays.put("part", cfg.getBoolean(irel+"part"));
+		gameRelays.put("kick", cfg.getBoolean(irel+"kick"));
+		gameRelays.put("msg", cfg.getBoolean(irel+"msg"));
+		gameRelays.put("nick", cfg.getBoolean(irel+"nick"));
+		gameRelays.put("me", cfg.getBoolean(irel+"me"));
+		gameRelays.put("color", cfg.getBoolean(irel+"color"));
+		
+		String grel = "game_to_irc.relay.";
+		ircRelays.put("join", cfg.getBoolean(grel+"join"));
+		ircRelays.put("part", cfg.getBoolean(grel+"part"));
+		ircRelays.put("kick", cfg.getBoolean(grel+"kick"));
+		ircRelays.put("msg", cfg.getBoolean(grel+"msg"));
+		ircRelays.put("me", cfg.getBoolean(grel+"me"));
+		ircRelays.put("color", cfg.getBoolean(grel+"color"));
+		
+		cmdPrefix = cfg.getString("config.command_prefix");
+		ircPrefix = ChatUtil.gameToIrcColors(
+				ChatUtil.correctCC(cfg.getString("game_to_irc.prefix")));
+		gamePrefix = ChatUtil.correctCC(cfg.getString("irc_to_game.prefix"));
+		nameFormat = ChatUtil.gameToIrcColors(
+				ChatUtil.correctCC(cfg.getString("game_to_irc.name_format")));
+		
+		isMchatEnabled = plugin.getServer().getPluginManager()
+				.isPluginEnabled("MChat");
 	}
 	
 	/**
@@ -260,14 +342,102 @@ public class IRC {
 	/**
 	 * Registers an IRCListener to the IRC bridge.
 	 */
-	public void registerIRCListener(IRCListener handler) {
-		listeners.add(handler);
+	public void registerIRCListener(IRCListener listener) {
+		listeners.add(listener);
 	}
 	
 	public List<IRCListener> getIRCListeners() {
 		return listeners;
 	}
 	
+	/**
+	 * Sends Game message to IRC.
+	 * 
+	 * @param message the string to send to IRC.
+	 */
+	public void sendIrcMessage(String message) {
+		String m = ircPrefix + 
+			(ircRelays.get("color") ? ChatUtil.gameToIrcColors(message)
+			: ChatUtil.stripGameColors(message));
+		for(String channel : channels.keySet())
+			sendMessage(channel, m);
+	}
+	
+	/**
+	 * Sends IRC message to game.
+	 * 
+	 * @param message the string to send to game.
+	 */
+	public void sendGameMessage(String message) {
+		String m = gamePrefix + (
+				gameRelays.get("color") ? ChatUtil.ircToGameColors(message)
+				: ChatUtil.stripIrcColors(message));
+		for(Player p : plugin.getServer().getOnlinePlayers())
+			p.sendMessage(m);
+		if(plugin.isVerbose())
+			plugin.getServer().getConsoleSender().sendMessage(m);
+	}
+	
+	public String getIrcMessage(String key) {
+		return ircMsgs.get(key);
+	}
+	
+	public String getGameMessage(String key) {
+		return gameMsgs.get(key);
+	}
+	
+	public boolean getIrcRelay(String key) {
+		return ircRelays.get(key);
+	}
+	
+	public boolean getGameRelay(String key) {
+		return gameRelays.get(key);
+	}
+	
+	public String getCommandPrefix() {
+		return cmdPrefix;
+	}
+	
+	public String getIrcMsgPrefix() {
+		return ircPrefix;
+	}
+	
+	public String getGameMsgPrefix() {
+		return gamePrefix;
+	}
+	
+	public boolean isMchatEnabled() {
+		return isMchatEnabled;
+	}
+	
+	public String formatPlayerName(Player player, String type) {
+		String name = player.getName();
+		World world = player.getWorld();
+		
+		String fname = getIrcMessage(type)
+				.replace("%nf%", nameFormat)
+				.replace("%name%", name)
+				.replace("%dname%", player.getDisplayName())
+				.replace("%world%", world.getName());
+		if(isMchatEnabled) {
+			String group = Reader.getGroup(name, world.getName());
+			fname = fname
+				.replace("%mname%", Reader.getMName(name))
+				.replace("%mgroup%", group)
+				.replace("%mgname%", Reader.getGroupName(group));
+		}
+		return ChatUtil.correctCC(fname);
+	}
+	
+	public String toGameColor(String message) {
+		return gameRelays.get("color") ? ChatUtil.ircToGameColors(message) :
+				ChatUtil.stripIrcColors(message);
+	}
+	
+	public String toIrcColor(String message) {
+		return ircRelays.get("color") ? ChatUtil.gameToIrcColors(message) :
+				ChatUtil.stripGameColors(message);
+	}
 	
 	class ControlListener extends IRCListener {
 
