@@ -3,6 +3,8 @@ package com.mutinycraft.irc.impl;
 import org.bukkit.event.*;
 import org.bukkit.event.player.*;
 
+import com.massivecraft.factions.P;
+
 import com.mutinycraft.irc.*;
 import com.mutinycraft.irc.plugin.Plugin;
 
@@ -28,6 +30,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 				.replace("%recipient%", channel)
 				.replace("%msg%", getIRC().toGameColor(message));
 		getIRC().sendGameMessage(msg);
+		
 	}
 	
 	@Override
@@ -66,15 +69,21 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	public void onGameMessage(AsyncPlayerChatEvent event) {
 		if(!getIRC().getIrcRelay("msg"))
 			return;
+		if(getPlugin().isFactionsEnabled()
+				&& P.p.isPlayerFactionChatting(event.getPlayer()))
+			return;
 		String sender = getIRC().formatPlayerName(event.getPlayer(), "msg");
 		String message = event.getMessage();
 		String msg = sender.replace("%msg%", message);
-		getIRC().sendIrcMessage(msg);
+		getIRC().sendIrcMessage(msg);		
 	}
 	
 	@EventHandler
 	public void onGameMe(PlayerCommandPreprocessEvent event) {
 		if(!getIRC().getIrcRelay("me"))
+			return;
+		if(getPlugin().isFactionsEnabled()
+				&& P.p.isPlayerFactionChatting(event.getPlayer()))
 			return;
 		String cmd = event.getMessage().trim();
 		String[] split = cmd.split(" ");

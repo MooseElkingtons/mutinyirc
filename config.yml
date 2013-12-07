@@ -6,7 +6,7 @@ config:
     message_interval: 750
     command_prefix: "."
     channels:
-        - "#mutinyirc"
+        - "#somechannelhere"
     verbose: true
   # startup_commands:
   #     - "PRIVMSG NickServ :identify MutinyIRC secretpassword"
@@ -33,11 +33,11 @@ game_to_irc:
     prefix: ""
     name_format: "%dname%" 
     messages:
-        join: "%nf%&r has joined."
-        part: "%nf%&r has left."
-        kick: "%nf%&r was kicked (%reason%)."
+        join: "%dname%&r has joined."
+        part: "%dname%&r has left."
+        kick: "%dname%&r was kicked (%reason%)."
         msg: "<%nf%&r> %msg%"
-        me: "* %nf%&r %action%"
+        me: "&7* %dname%&r %action%"
     relay:
         join: true
         part: true

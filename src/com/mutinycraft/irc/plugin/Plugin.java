@@ -17,11 +17,16 @@ public class Plugin extends JavaPlugin {
 	private IRC irc;
 	private String server = "";
 	private int port = 6667;
-	private boolean verbose = false;
+	private boolean verbose = false,
+			isMchatEnabled = false, isFactionsEnabled = false;
 	private List<String> listeners = new ArrayList<String>();
 	
 	@Override
 	public void onEnable() {
+		detectFactions();
+		isMchatEnabled = getServer().getPluginManager()
+				.isPluginEnabled("MChat");
+		
 		irc = new IRC(this);
 		loadConfig();
 		loadHandlers();
@@ -46,14 +51,38 @@ public class Plugin extends JavaPlugin {
 	private void loadConfig() {
 		saveDefaultConfig();
 		irc.setNick(getConfig().getString("config.nick"));
-		irc.setPass(getConfig().getString("config.pass"));
+		if(getConfig().contains("config.pass"))
+			irc.setPass(getConfig().getString("config.pass"));
 		server = getConfig().getString("config.server");
 		port = getConfig().getInt("config.port");
 		verbose = getConfig().getBoolean("config.verbose");
 	}
 	
+	private void detectFactions() {
+		org.bukkit.plugin.Plugin p = getServer().getPluginManager().
+				getPlugin("mcore");
+		boolean isMcoreEnabled = p != null && p.isEnabled();
+		isFactionsEnabled = getServer().getPluginManager()
+				.isPluginEnabled("Factions") && !isMcoreEnabled;
+		if(isMcoreEnabled) {
+			getLogger().log(Level.SEVERE, "MCore conflicts with "
+					+ "MutinyIRC; disabling MutinyIRC.");
+			getLogger().log(Level.SEVERE, "If you are using Factions, it "+
+					"is recommended you use version 1.6.9.4.");
+			getPluginLoader().disablePlugin(this);
+		}
+	}
+	
 	public boolean isVerbose() {
 		return verbose;
+	}
+	
+	public boolean isMchatEnabled() {
+		return isMchatEnabled;
+	}
+	
+	public boolean isFactionsEnabled() {
+		return isFactionsEnabled;
 	}
 	
 	public void loadHandlers() throws IllegalArgumentException {

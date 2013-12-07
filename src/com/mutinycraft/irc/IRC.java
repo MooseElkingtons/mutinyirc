@@ -9,7 +9,10 @@ import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
-import com.miraclem4n.mchat.api.Reader;
+import com.massivecraft.factions.FPlayer;
+import com.massivecraft.factions.FPlayers;
+import com.massivecraft.factions.P;
+import com.miraclem4n.mchat.api.*;
 import com.mutinycraft.irc.io.*;
 import com.mutinycraft.irc.IRCUser.*;
 import com.mutinycraft.irc.plugin.*;
@@ -33,7 +36,6 @@ public class IRC {
 		gameRelays = new HashMap<String, Boolean>();
 	private String cmdPrefix = ".", ircPrefix = "",
 					gamePrefix = "", nameFormat = "";
-	private boolean isMchatEnabled;
 
 	
 	private Plugin plugin;
@@ -130,9 +132,6 @@ public class IRC {
 		gamePrefix = ChatUtil.correctCC(cfg.getString("irc_to_game.prefix"));
 		nameFormat = ChatUtil.gameToIrcColors(
 				ChatUtil.correctCC(cfg.getString("game_to_irc.name_format")));
-		
-		isMchatEnabled = plugin.getServer().getPluginManager()
-				.isPluginEnabled("MChat");
 	}
 	
 	/**
@@ -406,10 +405,6 @@ public class IRC {
 		return gamePrefix;
 	}
 	
-	public boolean isMchatEnabled() {
-		return isMchatEnabled;
-	}
-	
 	public String formatPlayerName(Player player, String type) {
 		String name = player.getName();
 		World world = player.getWorld();
@@ -419,14 +414,24 @@ public class IRC {
 				.replace("%name%", name)
 				.replace("%dname%", player.getDisplayName())
 				.replace("%world%", world.getName());
-		if(isMchatEnabled) {
+		if(plugin.isMchatEnabled()) {
 			String group = Reader.getGroup(name, world.getName());
 			fname = fname
 				.replace("%mname%", Reader.getMName(name))
 				.replace("%mgroup%", group)
 				.replace("%mgname%", Reader.getGroupName(group));
 		}
-		return ChatUtil.correctCC(fname);
+		if(plugin.isFactionsEnabled()) {
+			String tag = P.p.getPlayerFactionTag(player);
+			FPlayer p = FPlayers.i.get(player);
+			boolean peaceful = p.getFaction().isPeaceful();
+			if(tag.equals("~"))
+				tag = "";
+			if(peaceful)
+				tag = "§6"+tag;
+			fname = fname.replace("%ftag%", tag);
+		}
+		return ChatUtil.correctCC(fname).trim();
 	}
 	
 	public String toGameColor(String message) {
