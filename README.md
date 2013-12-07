@@ -1,4 +1,4 @@
 mutinyirc
 =========
 
-extensible IRC plugin which only includes the bare essentials.
+extensible IRC plugin with a simple, yet elegant design.
