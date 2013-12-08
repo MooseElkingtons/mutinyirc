@@ -54,7 +54,9 @@ public class Plugin extends JavaPlugin {
 		if(getConfig().contains("config.pass"))
 			irc.setPass(getConfig().getString("config.pass"));
 		server = getConfig().getString("config.server");
+		irc.setServer(server);
 		port = getConfig().getInt("config.port");
+		irc.setPort(port);
 		verbose = getConfig().getBoolean("config.verbose");
 	}
 	
