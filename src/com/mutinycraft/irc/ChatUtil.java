@@ -24,29 +24,29 @@ public class ChatUtil {
 	public static final String IRC_COLOR_DGRAY  = "\u000314";
 	public static final String IRC_COLOR_GRAY   = "\u000315";
 	
-	public static final String GAME_COLOR_WHITE  = "§f";
-	public static final String GAME_COLOR_BLACK  = "§0";
-	public static final String GAME_COLOR_BLUE   = "§9";
-	public static final String GAME_COLOR_DGREEN = "§2";
-	public static final String GAME_COLOR_RED    = "§c";
-	public static final String GAME_COLOR_MAROON = "§4";
-	public static final String GAME_COLOR_PURPLE = "§5";
-	public static final String GAME_COLOR_GOLD   = "§6";
-	public static final String GAME_COLOR_YELLOW = "§e";
-	public static final String GAME_COLOR_GREEN  = "§a";
-	public static final String GAME_COLOR_DAQUA  = "§3";
-	public static final String GAME_COLOR_AQUA   = "§b";
-	public static final String GAME_COLOR_DBLUE  = "§1";
-	public static final String GAME_COLOR_PINK   = "§d";
-	public static final String GAME_COLOR_DGRAY  = "§8";
-	public static final String GAME_COLOR_GRAY   = "§7";
+	public static final String GAME_COLOR_WHITE  = "\u00A7f";
+	public static final String GAME_COLOR_BLACK  = "\u00A70";
+	public static final String GAME_COLOR_BLUE   = "\u00A79";
+	public static final String GAME_COLOR_DGREEN = "\u00A72";
+	public static final String GAME_COLOR_RED    = "\u00A7c";
+	public static final String GAME_COLOR_MAROON = "\u00A74";
+	public static final String GAME_COLOR_PURPLE = "\u00A75";
+	public static final String GAME_COLOR_GOLD   = "\u00A76";
+	public static final String GAME_COLOR_YELLOW = "\u00A7e";
+	public static final String GAME_COLOR_GREEN  = "\u00A7a";
+	public static final String GAME_COLOR_DAQUA  = "\u00A73";
+	public static final String GAME_COLOR_AQUA   = "\u00A7b";
+	public static final String GAME_COLOR_DBLUE  = "\u00A71";
+	public static final String GAME_COLOR_PINK   = "\u00A7d";
+	public static final String GAME_COLOR_DGRAY  = "\u00A78";
+	public static final String GAME_COLOR_GRAY   = "\u00A77";
 	
-	public static final String GAME_BOLD = "§l";
-	public static final String GAME_UNDERLINE = "§n";
-	public static final String GAME_STRIKETHROUGH = "§m";
-	public static final String GAME_ITALIC = "§o";
-	public static final String GAME_RESET = "§r";
-	public static final String GAME_OBFUSCATED = "§k";
+	public static final String GAME_BOLD = "\u00A7l";
+	public static final String GAME_UNDERLINE = "\u00A7n";
+	public static final String GAME_STRIKETHROUGH = "\u00A7m";
+	public static final String GAME_ITALIC = "\u00A7o";
+	public static final String GAME_RESET = "\u00A7r";
+	public static final String GAME_OBFUSCATED = "\u00A7k";
 	
 	public static final String IRC_BOLD = "\u0002";
 	public static final String IRC_UNDERLINE = "\u001F";
@@ -54,9 +54,10 @@ public class ChatUtil {
 	
 	public static String ircToGameColors(String message) {
 		return message
-					.replaceAll("\u0003(?=[0-9])[(?=\\w)]", "\u0003")
+					.replaceAll("\u0003(?=[0-9])[(?=[a-zA-Z])]", "\u0003")
 					.replaceAll("[\u0003]\\d+\\,[\\d+]", "")
-					.replaceAll("\u0003(?=\\w)", GAME_RESET)
+					.replaceAll("\u00031(?=[a-zA-Z])", "\u000301")
+					.replaceAll("\u00030(?=[a-zA-Z])", "\u000300")
 					.replace(IRC_COLOR_WHITE, GAME_COLOR_WHITE)
 					.replace(IRC_COLOR_BLACK, GAME_COLOR_BLACK)
 					.replace(IRC_COLOR_BLUE, GAME_COLOR_BLUE)
@@ -77,6 +78,7 @@ public class ChatUtil {
 					.replace(IRC_UNDERLINE, GAME_UNDERLINE)
 					.replace(IRC_RESET, GAME_RESET);
 	}
+
 
 	public static String gameToIrcColors(String message) {
 		return message.replace(GAME_COLOR_WHITE, IRC_COLOR_WHITE)
@@ -117,7 +119,7 @@ public class ChatUtil {
 	}
 	
 	public static String stripGameColors(String message) {
-		return message.replaceAll("\\§[\\w]", "");
+		return message.replaceAll("\\\u00A7[\\w]", "");
 	}
 	
 	/**
@@ -127,7 +129,7 @@ public class ChatUtil {
 	 * @return The corrected message
 	 */
 	public static String correctCC(String message) {
-		return message.replace("&", "§");
+		return message.replace("&", "\u00A7");
 	}
 
 }

@@ -1,3 +1,5 @@
+# See http://dev.bukkit.org/bukkit-plugins/mutinyirc/pages/configuration/
+# for help on setting up MutinyIRC configuration.
 config:
     nick: "MutinyIRC"
     server: "irc.esper.net"

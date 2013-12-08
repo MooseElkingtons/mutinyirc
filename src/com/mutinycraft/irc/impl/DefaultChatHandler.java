@@ -27,7 +27,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		
 		String msg = getIRC().getGameMessage("msg")
 				.replace("%user%", sender)
-				.replace("%recipient%", channel)
+				.replace("%channel%", channel)
 				.replace("%msg%", getIRC().toGameColor(message));
 		getIRC().sendGameMessage(msg);
 		
@@ -39,7 +39,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 			return;
 		String msg = getIRC().getGameMessage("me")
 				.replace("%user%", sender)
-				.replace("%recipient%", recipient)
+				.replace("%channelt%", recipient)
 				.replace("%action%", getIRC().toGameColor(action.trim()));
 		getIRC().sendGameMessage(msg);
 	}
