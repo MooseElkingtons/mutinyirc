@@ -3,15 +3,13 @@ package com.mutinycraft.irc;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.logging.Level;
+import java.util.logging.*;
 
-import org.bukkit.World;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
+import org.bukkit.*;
+import org.bukkit.configuration.file.*;
+import org.bukkit.entity.*;
 
-import com.massivecraft.factions.FPlayer;
-import com.massivecraft.factions.FPlayers;
-import com.massivecraft.factions.P;
+import com.massivecraft.factions.*;
 import com.miraclem4n.mchat.api.*;
 import com.mutinycraft.irc.io.*;
 import com.mutinycraft.irc.IRCUser.*;
@@ -405,21 +403,29 @@ public class IRC {
 		return gamePrefix;
 	}
 	
-	public String formatPlayerName(Player player, String type) {
+	public String formatGameMessage(Player player, String type) {
 		String name = player.getName();
 		World world = player.getWorld();
-		
 		String fname = getIrcMessage(type)
 				.replace("%nf%", nameFormat)
 				.replace("%name%", name)
 				.replace("%dname%", player.getDisplayName())
 				.replace("%world%", world.getName());
-		if(plugin.isMchatEnabled()) {
-			String group = Reader.getGroup(name, world.getName());
+		if(plugin.isVaultEnabled()) {
+			String group = plugin.getChat().getPrimaryGroup(player);
 			fname = fname
-				.replace("%mname%", Reader.getMName(name))
-				.replace("%mgroup%", group)
-				.replace("%mgname%", Reader.getGroupName(group));
+				.replace("%group%", group)
+				.replace("%gprefix%", plugin.getChat()
+						.getGroupPrefix(world, group))
+				.replace("%gsuffix%", plugin.getChat()
+						.getGroupSuffix(world, group))
+				.replace("%prefix%", plugin.getChat().getPlayerPrefix(player))
+				.replace("%suffix%", plugin.getChat().getPlayerSuffix(player));
+		}
+		if(plugin.isMChatEnabled()) {
+			String group = Reader.getGroup(name, world.getName());
+			fname = fname.replace("%mname%", Reader.getMName(name))
+					.replace("%mgname%", Reader.getGroupName(group));
 		}
 		if(plugin.isFactionsEnabled()) {
 			String tag = P.p.getPlayerFactionTag(player);
@@ -431,7 +437,7 @@ public class IRC {
 				tag = "§6"+tag;
 			fname = fname.replace("%ftag%", tag);
 		}
-		return ChatUtil.correctCC(fname).trim();
+		return ChatUtil.alltrim(ChatUtil.correctCC(fname));
 	}
 	
 	public String toGameColor(String message) {

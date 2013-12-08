@@ -4,4 +4,4 @@ main: com.mutinycraft.irc.plugin.Plugin
 author: MooseElkingtons
 description: extensible IRC plugin with a simple, yet elegant design.
 website: http://dev.bukkit.org/bukkit-plugins/mutinyirc/
-softdepend: ['MChat', 'Factions']
+softdepend: ['Vault', 'MChat', 'Factions']

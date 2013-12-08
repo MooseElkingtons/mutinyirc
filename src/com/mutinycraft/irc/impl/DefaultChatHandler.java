@@ -72,7 +72,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		if(getPlugin().isFactionsEnabled()
 				&& P.p.isPlayerFactionChatting(event.getPlayer()))
 			return;
-		String sender = getIRC().formatPlayerName(event.getPlayer(), "msg");
+		String sender = getIRC().formatGameMessage(event.getPlayer(), "msg");
 		String message = event.getMessage();
 		String msg = sender.replace("%msg%", message);
 		getIRC().sendIrcMessage(msg);		
@@ -90,7 +90,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		if(split.length > 1 && 
 				(split[0].equalsIgnoreCase("/me") ||
 						split[0].equalsIgnoreCase("/mchatme"))) {
-			String m = getIRC().formatPlayerName(event.getPlayer(), "me");
+			String m = getIRC().formatGameMessage(event.getPlayer(), "me");
 			String message = cmd.substring(cmd.indexOf(" ") + 1);
 			String p = m.replace("%action%", message);
 			getIRC().sendIrcMessage(p);
@@ -101,7 +101,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	public void onGameJoin(PlayerJoinEvent event) {
 		if(!getIRC().getIrcRelay("join"))
 			return;
-		String msg = getIRC().formatPlayerName(event.getPlayer(), "join");
+		String msg = getIRC().formatGameMessage(event.getPlayer(), "join");
 		getIRC().sendIrcMessage(msg);
 	}
 	
@@ -109,7 +109,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	public void onGameQuit(PlayerQuitEvent event) {
 		if(!getIRC().getIrcRelay("part"))
 			return;
-		String msg = getIRC().formatPlayerName(event.getPlayer(), "part");
+		String msg = getIRC().formatGameMessage(event.getPlayer(), "part");
 		getIRC().sendIrcMessage(msg);
 	}
 	
@@ -120,7 +120,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		String reason = "No reason";
 		if(event.getReason() != null)
 			reason = event.getReason();
-		String msg = getIRC().formatPlayerName(event.getPlayer(), "kick");
+		String msg = getIRC().formatGameMessage(event.getPlayer(), "kick");
 		getIRC().sendIrcMessage(msg.replace("%reason%", reason));
 	}
 }

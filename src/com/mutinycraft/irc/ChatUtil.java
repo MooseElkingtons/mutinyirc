@@ -81,7 +81,7 @@ public class ChatUtil {
 
 
 	public static String gameToIrcColors(String message) {
-		return message.replace(GAME_COLOR_WHITE, IRC_COLOR_WHITE)
+		return message.replace(GAME_COLOR_WHITE, IRC_COLOR_BLACK)
 					.replace(GAME_COLOR_BLACK, IRC_COLOR_BLACK)
 					.replace(GAME_COLOR_BLUE, IRC_COLOR_BLUE)
 					.replace(GAME_COLOR_DGREEN, IRC_COLOR_DGREEN)
@@ -130,6 +130,24 @@ public class ChatUtil {
 	 */
 	public static String correctCC(String message) {
 		return message.replace("&", "\u00A7");
+	}
+	
+	/**
+	 * Trims leading, following, and repeated whitespace.
+	 * 
+	 * @param message The message to trim
+	 * @return The trimmed message.
+	 */
+	public static String alltrim(String message) {
+		String m = "";
+		boolean leading = false;
+		for(int i = 0; i < message.length(); i++) {
+			char c = message.charAt(i);
+			if(!leading || !Character.isWhitespace(c))
+				m += c;
+			leading = Character.isWhitespace(c);
+		}
+		return m.trim();
 	}
 
 }

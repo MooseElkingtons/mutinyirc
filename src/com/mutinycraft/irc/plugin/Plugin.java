@@ -6,7 +6,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.*;
 
+import net.milkbowl.vault.chat.Chat;
+
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.*;
 
 import com.mutinycraft.irc.*;
@@ -14,18 +17,18 @@ import com.mutinycraft.irc.impl.*;
 
 public class Plugin extends JavaPlugin {
 	
+	private Chat chat;
 	private IRC irc;
 	private String server = "";
 	private int port = 6667;
 	private boolean verbose = false,
-			isMchatEnabled = false, isFactionsEnabled = false;
+			isVaultEnabled = false, isFactionsEnabled = false,
+			isMchatEnabled = false;
 	private List<String> listeners = new ArrayList<String>();
 	
 	@Override
 	public void onEnable() {
 		detectFactions();
-		isMchatEnabled = getServer().getPluginManager()
-				.isPluginEnabled("MChat");
 		
 		irc = new IRC(this);
 		loadConfig();
@@ -58,6 +61,34 @@ public class Plugin extends JavaPlugin {
 		port = getConfig().getInt("config.port");
 		irc.setPort(port);
 		verbose = getConfig().getBoolean("config.verbose");
+		
+		isVaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault");
+		if(isVaultEnabled) {
+			RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager()
+					.getRegistration(Chat.class);
+			if (chatProvider != null)
+				chat = chatProvider.getProvider();
+			if(chat == null)
+				isVaultEnabled = false;
+		}
+		isMchatEnabled = getServer().getPluginManager().isPluginEnabled("MChat");
+		
+		if(isVaultEnabled)
+			getLogger().log(Level.INFO, "Vault detected. Will accept Vault "
+					+ "vars.");
+		else
+			getLogger().log(Level.WARNING, "Could not find Vault Enabled.");
+		if(isFactionsEnabled)
+			getLogger().log(Level.INFO, "Factions detected. Will accept "
+					+ "faction vars.");
+		else
+			getLogger().log(Level.WARNING, "Could not find Factions Enabled.");
+		if(isMchatEnabled)
+			getLogger().log(Level.INFO, "MChat detected. Will accept "
+					+ "MChat vars.");
+		else
+			getLogger().log(Level.WARNING, "Could not find MChat Enabled.");
+
 	}
 	
 	private void detectFactions() {
@@ -67,11 +98,10 @@ public class Plugin extends JavaPlugin {
 		isFactionsEnabled = getServer().getPluginManager()
 				.isPluginEnabled("Factions") && !isMcoreEnabled;
 		if(isMcoreEnabled) {
-			getLogger().log(Level.SEVERE, "MCore conflicts with "
-					+ "MutinyIRC; disabling MutinyIRC.");
-			getLogger().log(Level.SEVERE, "If you are using Factions, it "+
-					"is recommended you use version 1.6.9.4.");
-			getPluginLoader().disablePlugin(this);
+			getLogger().log(Level.WARNING, "Your version of Factions does not "
+					+ "support MutinyIRC.");
+			getLogger().log(Level.WARNING, "If you are using Factions, it "+
+					"is recommended you disable it or use version 1.6.9.4.");
 		}
 	}
 	
@@ -79,12 +109,20 @@ public class Plugin extends JavaPlugin {
 		return verbose;
 	}
 	
-	public boolean isMchatEnabled() {
+	public boolean isMChatEnabled() {
 		return isMchatEnabled;
+	}
+	
+	public boolean isVaultEnabled() {
+		return isVaultEnabled;
 	}
 	
 	public boolean isFactionsEnabled() {
 		return isFactionsEnabled;
+	}
+	
+	public Chat getChat() {
+		return chat;
 	}
 	
 	public void loadHandlers() throws IllegalArgumentException {

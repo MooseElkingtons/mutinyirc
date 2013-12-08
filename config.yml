@@ -19,7 +19,7 @@ irc_to_game:
         join: "%user% has joined %channel%"
         part: "%user% has left %channel%"
         kick: "%user% was kicked by %kicker%"
-        msg: "%user%: %msg%"
+        msg: "%user%&f: %msg%"
         nick: "%oldnick% is now known as %newnick%"
         me: "* %user% %action%"
     relay:
