@@ -17,7 +17,7 @@ import com.mutinycraft.irc.impl.*;
 
 public class Plugin extends JavaPlugin {
 	
-	private Chat chat;
+	private Class<?> chat;
 	private IRC irc;
 	private String server = "";
 	private int port = 6667;
@@ -67,7 +67,7 @@ public class Plugin extends JavaPlugin {
 			RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager()
 					.getRegistration(Chat.class);
 			if (chatProvider != null)
-				chat = chatProvider.getProvider();
+				chat = chatProvider.getProvider().getClass();
 			if(chat == null)
 				isVaultEnabled = false;
 		}
@@ -77,17 +77,17 @@ public class Plugin extends JavaPlugin {
 			getLogger().log(Level.INFO, "Vault detected. Will accept Vault "
 					+ "vars.");
 		else
-			getLogger().log(Level.WARNING, "Could not find Vault Enabled.");
+			getLogger().log(Level.WARNING, "Vault not enabled.");
 		if(isFactionsEnabled)
 			getLogger().log(Level.INFO, "Factions detected. Will accept "
 					+ "faction vars.");
 		else
-			getLogger().log(Level.WARNING, "Could not find Factions Enabled.");
+			getLogger().log(Level.WARNING, "Factions not enabled.");
 		if(isMchatEnabled)
 			getLogger().log(Level.INFO, "MChat detected. Will accept "
 					+ "MChat vars.");
 		else
-			getLogger().log(Level.WARNING, "Could not find MChat Enabled.");
+			getLogger().log(Level.WARNING, "MChat not Enabled.");
 
 	}
 	
@@ -121,7 +121,7 @@ public class Plugin extends JavaPlugin {
 		return isFactionsEnabled;
 	}
 	
-	public Chat getChat() {
+	public Class<?> getChat() {
 		return chat;
 	}
 	

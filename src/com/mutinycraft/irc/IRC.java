@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 
+import net.milkbowl.vault.chat.Chat;
+
 import org.bukkit.*;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
@@ -412,15 +414,16 @@ public class IRC {
 				.replace("%dname%", player.getDisplayName())
 				.replace("%world%", world.getName());
 		if(plugin.isVaultEnabled()) {
-			String group = plugin.getChat().getPrimaryGroup(player);
+			Chat chat = (Chat) plugin.getChat().cast(Chat.class);
+			String group = chat.getPrimaryGroup(player);
 			fname = fname
 				.replace("%group%", group)
-				.replace("%gprefix%", plugin.getChat()
+				.replace("%gprefix%", chat
 						.getGroupPrefix(world, group))
-				.replace("%gsuffix%", plugin.getChat()
+				.replace("%gsuffix%", chat
 						.getGroupSuffix(world, group))
-				.replace("%prefix%", plugin.getChat().getPlayerPrefix(player))
-				.replace("%suffix%", plugin.getChat().getPlayerSuffix(player));
+				.replace("%prefix%", chat.getPlayerPrefix(player))
+				.replace("%suffix%", chat.getPlayerSuffix(player));
 		}
 		if(plugin.isMChatEnabled()) {
 			String group = Reader.getGroup(name, world.getName());

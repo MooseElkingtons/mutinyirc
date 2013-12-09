@@ -54,6 +54,7 @@ public class ChatUtil {
 	
 	public static String ircToGameColors(String message) {
 		return message
+					.replaceAll("\u0003(?=[2-9])", "\u00030")
 					.replaceAll("\u0003(?=[0-9])[(?=[a-zA-Z])]", "\u0003")
 					.replaceAll("[\u0003]\\d+\\,[\\d+]", "")
 					.replaceAll("\u00031(?=[a-zA-Z])", "\u000301")
@@ -108,10 +109,9 @@ public class ChatUtil {
 	public static String stripIrcColors(String message) {
 		return message
 					.replaceAll("\u0003(?=[2-9])", "\u00030")
-					.replaceAll("[\u0003]\\d+\\,[\\d][\\d]", "")
-					.replaceAll("\u0003[\\d]", "")
+					.replaceAll("[\u0003][\\d+]\\,[\\d][\\d]", "")
+					.replaceAll("\u0003[\\d](?=[a-zA-Z])", "")
 					.replaceAll("\u0003(?=[0-1])[(?=\\w)]", "")
-					.replaceAll("\u0003(?=\\w)", "")
 					.replace("\u0003", "")
 					.replace("\u0002", "")
 					.replace("\u001F", "")
