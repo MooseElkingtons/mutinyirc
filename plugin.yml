@@ -1,5 +1,5 @@
 name: MutinyIRC
-version: 1.0.1-r2
+version: 1.0.1-r3
 main: com.mutinycraft.irc.plugin.Plugin
 author: MooseElkingtons
 description: extensible IRC plugin with a simple, yet elegant design.

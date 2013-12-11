@@ -17,7 +17,7 @@ import com.mutinycraft.irc.impl.*;
 
 public class Plugin extends JavaPlugin {
 	
-	private Class<?> chat;
+	private Chat chat;
 	private IRC irc;
 	private String server = "";
 	private int port = 6667;
@@ -67,7 +67,7 @@ public class Plugin extends JavaPlugin {
 			RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager()
 					.getRegistration(Chat.class);
 			if (chatProvider != null)
-				chat = chatProvider.getProvider().getClass();
+				chat = chatProvider.getProvider();
 			if(chat == null)
 				isVaultEnabled = false;
 		}
@@ -121,7 +121,7 @@ public class Plugin extends JavaPlugin {
 		return isFactionsEnabled;
 	}
 	
-	public Class<?> getChat() {
+	public Chat getChat() {
 		return chat;
 	}
 	

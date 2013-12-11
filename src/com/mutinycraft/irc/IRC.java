@@ -414,7 +414,7 @@ public class IRC {
 				.replace("%dname%", player.getDisplayName())
 				.replace("%world%", world.getName());
 		if(plugin.isVaultEnabled()) {
-			Chat chat = (Chat) plugin.getChat().cast(Chat.class);
+			Chat chat = plugin.getChat();
 			String group = chat.getPrimaryGroup(player);
 			fname = fname
 				.replace("%group%", group)
