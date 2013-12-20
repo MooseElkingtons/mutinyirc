@@ -66,7 +66,8 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	}
 	
 	@Override
-	public void onJoin(String user, String channel) {
+	public void onJoin(String user, String login, String host,
+			String channel) {
 		if(!getIRC().getGameRelay("join") && 
 				!user.equalsIgnoreCase(getIRC().getNick()))
 			return;

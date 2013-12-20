@@ -40,7 +40,8 @@ public abstract class IRCListener {
 	 * @param user The user who joined the channel.
 	 * @param channel The channel the user joined.
 	 */
-	public void onJoin(String user, String channel) {
+	public void onJoin(String user, String login, String host, 
+			String channel) {
 		
 	}
 	

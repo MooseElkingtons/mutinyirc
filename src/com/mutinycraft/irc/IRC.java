@@ -52,6 +52,7 @@ public class IRC {
 	private int triedNicks = 0;
 	private HashMap<String, List<IRCUser>> channels = new HashMap<String,
 			List<IRCUser>>();
+	private HashMap<String, String> whos = new HashMap<String, String>();
 	private List<String> loadship = new ArrayList<String>();
 	
 	public IRC(Plugin plugin) {
@@ -307,7 +308,37 @@ public class IRC {
 			users.addAll(channels.get(c));
 		return users;
 	}
+	
+	/**
+	 * Gets the user hostname based on the nick.
+	 * 
+	 * @param nick The nick of the user
+	 * @return The hostname
+	 */
+	public String getUserHost(String nick) {
+		return whos.get(nick.toLowerCase()).split("@")[1];
+	}
+	
+	/**
+	 * Gets the user login name based on the nick.
+	 * 
+	 * @param nick The nick of the user
+	 * @return The login name
+	 */
+	public String getUserLogin(String nick) {
+		return whos.get(nick.toLowerCase()).split("@")[0];
+	}
 
+	/**
+	 * Checks if the IRC bridge is in a same channel as the specified user.
+	 * 
+	 * @param nick The nick to check.
+	 * @return Whether or not the IRC bridge can see the specified user.
+	 */
+	public boolean isUserVisible(String nick) {
+		return whos.containsKey(nick.toLowerCase());
+	}
+	
 	/**
 	 * Sets the IRC bridge's nickname.
 	 * 
@@ -449,7 +480,7 @@ public class IRC {
 				.replace("%dname%", player.getDisplayName())
 				.replace("%world%", world.getName());
 		if(plugin.isVaultEnabled()) {
-			Chat chat = plugin.getChat();
+			Chat chat = plugin.getVaultChat();
 			String group = chat.getPrimaryGroup(player);
 			fname = fname
 				.replace("%group%", group)
@@ -508,6 +539,7 @@ public class IRC {
 		
 		@Override
 		public void onPart(String user, String channel) {
+			whos.remove(user.toLowerCase());
             channel = channel.replace(":", "");
 			if(user.equalsIgnoreCase(nick))
 				channels.remove(channel.toLowerCase());
@@ -516,14 +548,14 @@ public class IRC {
 		}
 		
 		@Override
-		public void onJoin(String user, String channel) {
+		public void onJoin(String user, String login, String host,
+				String channel) {
+			whos.put(user.toLowerCase(), login+"@"+host);
             channel = channel.replace(":", "");
 			if(!channels.containsKey(channel.toLowerCase()))
 				channels.put(channel.toLowerCase(), new ArrayList<IRCUser>());
 			sendRaw("NAMES "+channel);
 		}
-		
-		
 		
 		@Override
 		public void onModeChanged(String channel, String user, String modes) {
@@ -546,6 +578,10 @@ public class IRC {
 		
 		@Override
 		public void onNick(String oldNick, String newNick) {
+			String n = oldNick.toLowerCase();
+			String x = whos.get(n);
+			whos.remove(n);
+			whos.put(newNick.toLowerCase(), x);
 			if(oldNick.equalsIgnoreCase(nick))
 				nick = newNick;
 			for(String c : channels.keySet()) {
@@ -583,11 +619,16 @@ public class IRC {
 			switch(code) {
 				case ReplyConstants.RPL_ENDOFMOTD:
 					String chanlist = "";
-					for(String chan : plugin.getConfig()
-							.getStringList("config.channels"))
+					List<String> clist = plugin.getConfig()
+							.getStringList("config.channels");
+					for(String chan : clist) {
 						chanlist += chan + ",";
+					}
 					sendRaw("JOIN "+chanlist.substring(0,
 							chanlist.lastIndexOf(',')));
+					for(String chan : clist) {
+						sendRaw("WHO "+chan);
+					}
 					break;
 			
 				case ReplyConstants.RPL_NAMREPLY:
@@ -640,6 +681,15 @@ public class IRC {
 							"d and registered to "+server+".");
 					for(String scm : loadship)
 						sendRaw(scm);
+					break;
+					
+				case ReplyConstants.RPL_WHOREPLY:
+					String wnick = res[5].toLowerCase();
+					String whost = res[3];
+					String wlogin = res[2];
+					if(whos.containsKey(wnick))
+						whos.remove(wnick);
+					whos.put(wnick, wlogin+"@"+whost);
 					break;
 				
 				case ReplyConstants.ERR_ERRONEOUSNICKNAME:

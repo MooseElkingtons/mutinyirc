@@ -40,7 +40,7 @@ public class Plugin extends JavaPlugin {
 		} catch(IOException e) {
 			getLogger().log(Level.SEVERE, "Error initiating IRC connection", e);
 		}
-
+		bindCommands();
 		getLogger().log(Level.INFO, "MutinyIRC Plugin Enabled.");
 	}
 	
@@ -49,6 +49,14 @@ public class Plugin extends JavaPlugin {
 		getLogger().log(Level.INFO, "Disconnecting from IRC.");
 		irc.disconnect();
 		getLogger().log(Level.INFO, "MutinyIRC Plugin Disabled.");
+	}
+	
+	private void bindCommands() {
+		BridgeCmdExecutor ex = new BridgeCmdExecutor(irc, this);
+		getCommand("voice").setExecutor(ex);
+		getCommand("devoice").setExecutor(ex);
+		getCommand("kick").setExecutor(ex);
+		getCommand("ban").setExecutor(ex);
 	}
 	
 	private void loadConfig() {
@@ -107,7 +115,7 @@ public class Plugin extends JavaPlugin {
 		boolean isMcoreEnabled = p != null && p.isEnabled();
 		isFactionsEnabled = getServer().getPluginManager()
 				.isPluginEnabled("Factions") && !isMcoreEnabled;
-        if(isFactionsEnabled){
+        if(isFactionsEnabled) {
             isFactionsEnabled = getConfig().getBoolean("advanced.factions_support", true);
         }
 		if(isMcoreEnabled) {
@@ -138,7 +146,7 @@ public class Plugin extends JavaPlugin {
 		return isFactionsEnabled;
 	}
 	
-	public Chat getChat() {
+	public Chat getVaultChat() {
 		return chat;
 	}
 	

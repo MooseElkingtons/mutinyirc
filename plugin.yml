@@ -5,3 +5,21 @@ author: MooseElkingtons
 description: extensible IRC plugin with a simple, yet elegant design.
 website: http://dev.bukkit.org/bukkit-plugins/mutinyirc/
 softdepend: ['Vault', 'MChat', 'Factions']
+
+commands:
+    voice:
+        description: This voices the specific user in IRC.
+        usage: /voice <nick>
+        permission: mutinyirc.cmd.voice
+    devoice:
+        description: This removes voice from the specified user in IRC.
+        usage: /devoice <nick>
+        permission: mutinyirc.cmd.devoice
+    kick:
+        description: This kicks the user from the IRC channel(s).
+        usage: /kick <nick> [reason]
+        permission: mutinyirc.cmd.kick
+    ban:
+        description: This bans the user from the IRC channel(s).
+        usage: /ban <nick> [reason]
+        permission: mutinyirc.cmd.ban

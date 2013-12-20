@@ -52,5 +52,10 @@ advanced:
     vault_support: true
     factions_support: true
     mchat_support: true
+    commands:
+        command_voice: "MODE %channel% +v %nick%"
+        command_devoice: "MODE %channel% -v %nick%"
+        command_kick: "KICK %channel% %nick% :%reason%"
+        command_ban: "MODE %channel% +b *!*@%host%\r\nKICK %channel% %nick% :%reason%"
     handlers:
         - "DefaultChatHandler"
