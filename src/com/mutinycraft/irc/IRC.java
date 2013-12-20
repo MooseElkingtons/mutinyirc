@@ -592,6 +592,8 @@ public class IRC {
 					String[] msx = response.split(":");
 					String[] xres = msx[1].split(" ");
 					String chn = msx[0].substring(msx[0].indexOf("#"));
+					if(!isChannel(chn))
+						return;
 					for(String xrs : xres) {
 						String nick = xrs.substring(1);
 						char xc = xrs.charAt(0);
@@ -619,16 +621,15 @@ public class IRC {
 						}
 						if(!bufferNam.containsKey(nick.toLowerCase()))
 							bufferNam.put(nick.toLowerCase(),
-									new IRCUser(nick, mode, chn));
+									new IRCUser(nick, mode, chn.toLowerCase()));
 					}
 					break;
 				
 				case ReplyConstants.RPL_ENDOFNAMES:
 					String channel = res[1].toLowerCase();
-					if(isChannel(channel)) {
-						channels.remove(channel);
+					channels.remove(channel);
+					if(isChannel(channel))
 						channels.put(channel, new ArrayList<IRCUser>(bufferNam.values()));
-					}
 					bufferNam.clear();
 					break;
 					
