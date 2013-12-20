@@ -508,6 +508,7 @@ public class IRC {
 		
 		@Override
 		public void onPart(String user, String channel) {
+            channel = channel.replaceAll(":", "");
 			if(user.equalsIgnoreCase(nick))
 				channels.remove(channel.toLowerCase());
 			else
@@ -516,6 +517,7 @@ public class IRC {
 		
 		@Override
 		public void onJoin(String user, String channel) {
+            channel = channel.replaceAll(":", "");
 			if(!channels.containsKey(channel.toLowerCase()))
 				channels.put(channel.toLowerCase(), new ArrayList<IRCUser>());
 			sendRaw("NAMES "+channel);
