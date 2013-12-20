@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.logging.*;
 
+import com.miraclem4n.mchat.types.InfoType;
 import net.milkbowl.vault.chat.Chat;
 
 import org.bukkit.*;
@@ -453,9 +454,8 @@ public class IRC {
 				.replace("%suffix%", chat.getPlayerSuffix(player));
 		}
 		if(plugin.isMChatEnabled()) {
-			String group = Reader.getGroup(name, world.getName());
-			fname = fname.replace("%mname%", Reader.getMName(name))
-					.replace("%mgname%", Reader.getGroupName(group));
+			fname = fname.replace("%mprefix%", getPrefix(player))
+					.replace("%msuffix%", getSuffix(player));
 		}
 		if(plugin.isFactionsEnabled()) {
 			String tag = P.p.getPlayerFactionTag(player);
@@ -464,7 +464,7 @@ public class IRC {
 			if(tag.equals("~"))
 				tag = "";
 			if(peaceful)
-				tag = "§6"+tag;
+				tag = "ï¿½6"+tag;
 			fname = fname.replace("%ftag%", tag);
 		}
 		return ChatUtil.alltrim(ChatUtil.correctCC(fname));
@@ -664,4 +664,20 @@ public class IRC {
 			}
 		}
 	}
+
+    private static String getSuffix(Player player) {
+        if (Bukkit.getServer().getPluginManager().getPlugin("mChatSuite") != null) {
+            return Reader.getSuffix(player.getName(), InfoType.USER, player
+                    .getWorld().getName());
+        }
+        return player.getDisplayName();
+    }
+
+    private static String getPrefix(Player player) {
+        if (Bukkit.getServer().getPluginManager().getPlugin("mChatSuite") != null) {
+            return Reader.getPrefix(player.getName(), InfoType.USER, player
+                    .getWorld().getName());
+        }
+        return player.getDisplayName();
+    }
 }
