@@ -36,12 +36,18 @@ public class IRCInputThread implements Runnable {
 		try {
 			String i;
 			while(irc.isConnected() && (i = in.readLine()) != null) {
+				if(plugin.isEVerbose())
+					plugin.getLogger().log(Level.INFO, i);
 				String[] split = i.split(" ");
 				String response = i.substring(i.indexOf(" ", 2) + 1);
 				if(split[1].matches("\\d+"))
 					for(IRCListener l : irc.getIRCListeners())
 						l.onServerResponse(Integer.parseInt(split[1]),
 								response);
+				
+				if(split[0].equalsIgnoreCase("JOIN"))
+					if(!irc.getChannels().contains(split[1].toLowerCase()))
+						irc.sendRaw("NAMES "+split[1]);
 
 				if(split[0].equalsIgnoreCase("PING"))
 					for(IRCListener l : irc.getIRCListeners())
@@ -64,7 +70,7 @@ public class IRCInputThread implements Runnable {
 				if(split[1].equalsIgnoreCase("JOIN")) {
 					String user = i.substring(1, i.indexOf("!"));
 					for(IRCListener l : irc.getIRCListeners())
-						l.onJoin(split[2], user);
+						l.onJoin(user, split[2]);
 				}
 				
 				if(split[1].equalsIgnoreCase("KICK")) {

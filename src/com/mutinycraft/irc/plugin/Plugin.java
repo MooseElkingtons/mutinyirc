@@ -21,7 +21,7 @@ public class Plugin extends JavaPlugin {
 	private IRC irc;
 	private String server = "";
 	private int port = 6667;
-	private boolean verbose = false,
+	private boolean verbose = false, everbose = false,
 			isVaultEnabled = false, isFactionsEnabled = false,
 			isMchatEnabled = false;
 	private List<String> listeners = new ArrayList<String>();
@@ -33,7 +33,7 @@ public class Plugin extends JavaPlugin {
 		irc = new IRC(this);
 		loadConfig();
 		loadHandlers();
-		getLogger().log(Level.INFO, "Starting IRC connection.");
+		getLogger().log(Level.INFO, "Starting IRC connection to "+server+".");
 		try {
 			Socket socket = new Socket(server, port);
 			irc.connect(socket);
@@ -61,6 +61,8 @@ public class Plugin extends JavaPlugin {
 		port = getConfig().getInt("config.port");
 		irc.setPort(port);
 		verbose = getConfig().getBoolean("config.verbose");
+		if(getConfig().contains("config.extra_verbose"))
+			everbose = getConfig().getBoolean("config.extra_verbose");
 		
 		isVaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault");
 		if(isVaultEnabled) {
@@ -71,7 +73,9 @@ public class Plugin extends JavaPlugin {
 			if(chat == null)
 				isVaultEnabled = false;
 		}
-		isMchatEnabled = getServer().getPluginManager().isPluginEnabled("MChat");
+		isMchatEnabled = getServer().getPluginManager()
+				.isPluginEnabled("MChat") ||
+				getServer().getPluginManager().isPluginEnabled("mChatSuite");
 		
 		if(isVaultEnabled)
 			getLogger().log(Level.INFO, "Vault detected. Will accept Vault "
@@ -107,6 +111,10 @@ public class Plugin extends JavaPlugin {
 	
 	public boolean isVerbose() {
 		return verbose;
+	}
+	
+	public boolean isEVerbose() {
+		return everbose;
 	}
 	
 	public boolean isMChatEnabled() {

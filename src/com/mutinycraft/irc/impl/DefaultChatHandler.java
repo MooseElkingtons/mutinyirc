@@ -19,10 +19,10 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	public void onMessage(String sender, String channel, String message) {
 		if(!getIRC().getGameRelay("msg"))
 			return;
-		String pcmd = message.split(" ")[0].substring(
-				getIRC().getCommandPrefix().length());
-		if(pcmd.equalsIgnoreCase("list") || pcmd.equalsIgnoreCase("who") ||
-				pcmd.equalsIgnoreCase("players"))
+		String pcmd = message.substring(
+				getIRC().getCommandPrefix().length()).toLowerCase();
+		if(pcmd.startsWith("list") || pcmd.startsWith("who") ||
+				pcmd.startsWith("players"))
 			return;
 		
 		String msg = getIRC().getGameMessage("msg")
@@ -39,7 +39,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 			return;
 		String msg = getIRC().getGameMessage("me")
 				.replace("%user%", sender)
-				.replace("%channelt%", recipient)
+				.replace("%channel%", recipient)
 				.replace("%action%", getIRC().toGameColor(action.trim()));
 		getIRC().sendGameMessage(msg);
 	}
@@ -64,7 +64,29 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 				.replace("%channel%", channel);
 		getIRC().sendGameMessage(msg);
 	}
-
+	
+	@Override
+	public void onJoin(String user, String channel) {
+		if(!getIRC().getGameRelay("join") && 
+				!user.equalsIgnoreCase(getIRC().getNick()))
+			return;
+		String msg = getIRC().getGameMessage("join")
+				.replace("%user%", user)
+				.replace("%channel%", channel);
+		getIRC().sendGameMessage(msg);
+	}
+	
+	@Override
+	public void onPart(String user, String channel) {
+		if(!getIRC().getGameRelay("part") && 
+				!user.equalsIgnoreCase(getIRC().getNick()))
+			return;
+		String msg = getIRC().getGameMessage("part")
+				.replace("%user%", user)
+				.replace("%channel%", channel);
+		getIRC().sendGameMessage(msg);
+	}
+	
 	@EventHandler
 	public void onGameMessage(AsyncPlayerChatEvent event) {
 		if(!getIRC().getIrcRelay("msg"))

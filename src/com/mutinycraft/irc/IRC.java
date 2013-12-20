@@ -140,12 +140,27 @@ public class IRC {
 	 * @param channel The channel to join.
 	 */
 	public void joinChannel(String channel) {
-		if(!channel.startsWith("#") &&
-			!channel.startsWith("&") &&
-			!channel.startsWith("+") &&
-			!channel.startsWith("!"))
-			channel = "#" + channel;
 		sendRaw("JOIN "+channel);
+	}
+		
+	/**
+	 * Formats channel names properly.
+	 * 
+	 * @param channel The channel name to format.
+	 * @return The formatted channel name.
+	 */
+	public String formatChannel(String channel) {
+		String c = channel.replace(":", "");
+		if(!isChannel(channel))
+				c = "#" + channel;
+		return c;
+	}
+	
+	public boolean isChannel(String string) {
+		return string.startsWith("#") ||
+				string.startsWith("&") ||
+				string.startsWith("+") ||
+				string.startsWith("!");
 	}
 	
 	/**
@@ -175,6 +190,7 @@ public class IRC {
 	 * @param message The message to send.
 	 */
 	public void sendMessage(String recipient, String message) {
+		recipient = recipient.replace(":", "");
 		String preCmd = "PRIVMSG "+recipient+" :";
 		int clen = 420 - preCmd.length() - recipient.length();
 		List<String> msgs = new ArrayList<String>();
@@ -272,6 +288,17 @@ public class IRC {
 	public List<IRCUser> getUsers(String channel) {
 		return channels.get(channel);
 	}
+	
+	/**
+	 * Gets every IRC user in every channel we are in.
+	 * 
+	 */
+	public List<IRCUser> getAllUsers() {
+		List<IRCUser> users = new ArrayList<IRCUser>();
+		for(String c : getChannels())
+			users.addAll(channels.get(c));
+		return users;
+	}
 
 	/**
 	 * Sets the IRC bridge's nickname.
@@ -280,7 +307,7 @@ public class IRC {
 	 */
 	public void setNick(String nick) {
 		if(isConnected())
-			queue.add("NICK "+nick);
+			sendRaw("NICK "+nick);
 		this.nick = nick;
 	}
 	
@@ -461,24 +488,33 @@ public class IRC {
 		
 		@Override
 		public void onConnect() {
-			String message = "";
 			if(pass != null && !pass.isEmpty())
-				message += "PASS "+pass+"\r\n";
-			message += "NICK "+nick+"\r\nUSER "+nick+" 0 * :MutinyIRC";
-			sendRaw(message);
+				sendRaw("PASS "+pass);
+			sendRaw("NICK "+nick);
+			sendRaw("USER "+nick+" 0 * :MutinyIRC");
 		}
 		
 		@Override
-		public void onPart(String channel, String user) {
-			sendRaw("NAMES "+channel);
+		public void onDisconnect() {
+			plugin.getLogger().log(Level.INFO,"Disconnected from "+server+".");
 		}
 		
 		@Override
-		public void onJoin(String channel, String user) {
+		public void onPart(String user, String channel) {
+			if(user.equalsIgnoreCase(nick))
+				channels.remove(channel.toLowerCase());
+			else
+				sendRaw("NAMES "+channel);
+		}
+		
+		@Override
+		public void onJoin(String user, String channel) {
 			if(!channels.containsKey(channel.toLowerCase()))
 				channels.put(channel.toLowerCase(), new ArrayList<IRCUser>());
 			sendRaw("NAMES "+channel);
 		}
+		
+		
 		
 		@Override
 		public void onModeChanged(String channel, String user, String modes) {
@@ -546,7 +582,9 @@ public class IRC {
 					break;
 			
 				case ReplyConstants.RPL_NAMREPLY:
-					String[] xres = response.split(":")[1].split(" ");
+					String[] msx = response.split(":");
+					String[] xres = msx[1].split(" ");
+					String chn = msx[0].substring(msx[0].indexOf("#"));
 					for(String xrs : xres) {
 						String nick = xrs.substring(1);
 						char xc = xrs.charAt(0);
@@ -574,18 +612,22 @@ public class IRC {
 						}
 						if(!bufferNam.containsKey(nick.toLowerCase()))
 							bufferNam.put(nick.toLowerCase(),
-									new IRCUser(nick, mode, res[2]));
+									new IRCUser(nick, mode, chn));
 					}
 					break;
 				
 				case ReplyConstants.RPL_ENDOFNAMES:
-					String channel = res[0].toLowerCase();
-					channels.remove(channel);
-					channels.put(channel, new ArrayList<IRCUser>(bufferNam.values()));
+					String channel = res[1].toLowerCase();
+					if(isChannel(channel)) {
+						channels.remove(channel);
+						channels.put(channel, new ArrayList<IRCUser>(bufferNam.values()));
+					}
 					bufferNam.clear();
 					break;
 					
 				case ReplyConstants.RPL_WELCOME:
+					plugin.getLogger().log(Level.INFO, "Successfully connecte"+
+							"d and registered to "+server+".");
 					for(String scm : loadship)
 						sendRaw(scm);
 					break;

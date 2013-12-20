@@ -40,7 +40,8 @@ public class IRCCommandListener extends IRCListener implements Listener {
 						plist += "No players online.";
 					else {
 						for(Player p : players)
-							plist +=p.getDisplayName()+ChatUtil.IRC_RESET+", ";
+							plist+=ChatUtil.gameToIrcColors(
+								p.getDisplayName())+ChatUtil.IRC_RESET+", ";
 						plist = plist.substring(0, plist.lastIndexOf(','));
 					}
 					getIRC().sendMessage(channel, plist);

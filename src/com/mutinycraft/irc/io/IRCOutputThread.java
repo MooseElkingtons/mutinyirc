@@ -38,10 +38,12 @@ public class IRCOutputThread implements Runnable {
 			try {
 				String o = irc.queue.poll();
 				if(o != null && !o.isEmpty()) {
+					if(plugin.isEVerbose())
+						plugin.getLogger().log(Level.INFO, ">>> "+o);
 					out.write(o+"\r\n");
 					out.flush();
+					Thread.sleep(queueInterval);
 				}
-				Thread.sleep(queueInterval);
 			} catch(Exception e) {
 				plugin.getLogger().log(Level.SEVERE, null, e);
 			}
