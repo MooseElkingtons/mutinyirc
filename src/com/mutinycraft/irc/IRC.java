@@ -270,6 +270,13 @@ public class IRC {
 	}
 	
 	public List<String> getChannels() {
+		if(plugin.isEVerbose()) {
+			String cls = "";
+			for(String s : channels.keySet())
+				cls += s + ", ";
+			plugin.getLogger().log(Level.INFO, "Channels: "
+				+cls.substring(cls.lastIndexOf(",")));
+		}
 		return new ArrayList<String>(channels.keySet());
 	}
 	

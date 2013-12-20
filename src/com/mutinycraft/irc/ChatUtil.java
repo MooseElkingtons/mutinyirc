@@ -82,7 +82,7 @@ public class ChatUtil {
 
 
 	public static String gameToIrcColors(String message) {
-		return message.replace(GAME_COLOR_WHITE, IRC_COLOR_BLACK)
+		return message.replace(GAME_COLOR_WHITE, IRC_RESET)
 					.replace(GAME_COLOR_BLACK, IRC_COLOR_BLACK)
 					.replace(GAME_COLOR_BLUE, IRC_COLOR_BLUE)
 					.replace(GAME_COLOR_DGREEN, IRC_COLOR_DGREEN)
