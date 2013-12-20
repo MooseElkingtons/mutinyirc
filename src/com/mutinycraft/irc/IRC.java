@@ -98,6 +98,9 @@ public class IRC {
 		gameMsgs.put("me",
 				ChatUtil.ircToGameColors(ChatUtil.correctCC(
 						cfg.getString(imsg+"me"))));
+		gameMsgs.put("modes",
+				ChatUtil.ircToGameColors(ChatUtil.correctCC(
+						cfg.getString(imsg+"modes"))));
 		
 		String gmsg = "game_to_irc.messages.";
 		ircMsgs.put("join", ChatUtil.gameToIrcColors(
@@ -118,6 +121,7 @@ public class IRC {
 		gameRelays.put("msg", cfg.getBoolean(irel+"msg"));
 		gameRelays.put("nick", cfg.getBoolean(irel+"nick"));
 		gameRelays.put("me", cfg.getBoolean(irel+"me"));
+		gameRelays.put("modes", cfg.getBoolean(irel+"modes"));
 		gameRelays.put("color", cfg.getBoolean(irel+"color"));
 		
 		String grel = "game_to_irc.relay.";

@@ -22,6 +22,7 @@ irc_to_game:
         msg: "%user%&f: %msg%"
         nick: "%oldnick% is now known as %newnick%"
         me: "* %user% %action%"
+        modes: "%user% has set %mode% on %channel%"
     relay:
         join: true
         part: true
@@ -29,6 +30,7 @@ irc_to_game:
         msg: true
         nick: true
         me: true
+        modes: true
         color: true
 
 game_to_irc:

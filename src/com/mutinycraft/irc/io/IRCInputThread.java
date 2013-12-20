@@ -128,9 +128,11 @@ public class IRCInputThread implements Runnable {
 					if(split[0].contains("!"))
 						user = i.substring(1, i.indexOf("!"));
 					String channel = split[2];
-					String modes = i.substring(i.indexOf(" ", 2) + 1);
+					String modes = "";
+					for(int idx = 3; idx < split.length; idx++)
+						modes += split[idx]+" ";
 					for(IRCListener l : irc.getIRCListeners())
-						l.onModeChanged(channel, user, modes);
+						l.onModeChanged(channel, user, modes.trim());
 				}
 				
 				if(split[1].equalsIgnoreCase("NOTICE")) {
