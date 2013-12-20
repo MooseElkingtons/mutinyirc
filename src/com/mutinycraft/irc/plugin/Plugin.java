@@ -65,6 +65,9 @@ public class Plugin extends JavaPlugin {
 			everbose = getConfig().getBoolean("config.extra_verbose");
 		
 		isVaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault");
+        if(isVaultEnabled){
+            isVaultEnabled = getConfig().getBoolean("advanced.vault_support", true);
+        }
 		if(isVaultEnabled) {
 			RegisteredServiceProvider<Chat> chatProvider = getServer().getServicesManager()
 					.getRegistration(Chat.class);
@@ -76,6 +79,9 @@ public class Plugin extends JavaPlugin {
 		isMchatEnabled = getServer().getPluginManager()
 				.isPluginEnabled("MChat") ||
 				getServer().getPluginManager().isPluginEnabled("mChatSuite");
+        if(isMchatEnabled){
+            isMchatEnabled = getConfig().getBoolean("advanced.mchat_support", true);
+        }
 		
 		if(isVaultEnabled)
 			getLogger().log(Level.INFO, "Vault detected. Will accept Vault "
@@ -101,6 +107,9 @@ public class Plugin extends JavaPlugin {
 		boolean isMcoreEnabled = p != null && p.isEnabled();
 		isFactionsEnabled = getServer().getPluginManager()
 				.isPluginEnabled("Factions") && !isMcoreEnabled;
+        if(isFactionsEnabled){
+            isFactionsEnabled = getConfig().getBoolean("advanced.factions_support", true);
+        }
 		if(isMcoreEnabled) {
 			getLogger().log(Level.WARNING, "Your version of Factions does not "
 					+ "support MutinyIRC.");

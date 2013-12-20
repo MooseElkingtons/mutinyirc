@@ -49,5 +49,8 @@ game_to_irc:
         color: true
 
 advanced:
+    vault_support: true
+    factions_support: true
+    mchat_support: true
     handlers:
         - "DefaultChatHandler"
