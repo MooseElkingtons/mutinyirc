@@ -464,7 +464,7 @@ public class IRC {
 			if(tag.equals("~"))
 				tag = "";
 			if(peaceful)
-				tag = "�6"+tag;
+				tag = "\u00A76"+tag;
 			fname = fname.replace("%ftag%", tag);
 		}
 		return ChatUtil.alltrim(ChatUtil.correctCC(fname));
