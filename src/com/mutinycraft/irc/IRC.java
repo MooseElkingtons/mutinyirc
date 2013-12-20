@@ -666,18 +666,10 @@ public class IRC {
 	}
 
     private static String getSuffix(Player player) {
-        if (Bukkit.getServer().getPluginManager().getPlugin("mChatSuite") != null) {
-            return Reader.getSuffix(player.getName(), InfoType.USER, player
-                    .getWorld().getName());
-        }
-        return player.getDisplayName();
+        return Reader.getSuffix(player.getName(), InfoType.USER, player.getWorld().getName());
     }
 
     private static String getPrefix(Player player) {
-        if (Bukkit.getServer().getPluginManager().getPlugin("mChatSuite") != null) {
-            return Reader.getPrefix(player.getName(), InfoType.USER, player
-                    .getWorld().getName());
-        }
-        return player.getDisplayName();
+        return Reader.getPrefix(player.getName(), InfoType.USER, player.getWorld().getName());
     }
 }
