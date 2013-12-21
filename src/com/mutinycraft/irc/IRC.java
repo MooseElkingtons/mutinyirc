@@ -197,12 +197,13 @@ public class IRC {
 	 * @param message The message to send.
 	 */
 	public void sendMessage(String recipient, String message) {
+		String msg = message.replace("\r\n", " ");
 		recipient = recipient.replace(":", "");
 		String preCmd = "PRIVMSG "+recipient+" :";
 		int clen = 420 - preCmd.length() - recipient.length();
 		List<String> msgs = new ArrayList<String>();
 		for(int i = 0; i < message.length(); i+=clen)
-			msgs.add(message
+			msgs.add(msg
 					.substring(i, Math.min(message.length(), i + clen)));
 		for(String s : msgs)
 			sendRaw(preCmd+s);
