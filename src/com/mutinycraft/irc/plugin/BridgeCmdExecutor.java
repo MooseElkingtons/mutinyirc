@@ -1,6 +1,5 @@
 package com.mutinycraft.irc.plugin;
 
-import org.bukkit.ChatColor;
 import org.bukkit.command.*;
 
 import com.mutinycraft.irc.*;
@@ -47,15 +46,9 @@ public class BridgeCmdExecutor implements CommandExecutor {
 		if(sender.hasPermission("mutinyirc.cmd.voice")) {
 			if(args.length < 1)
 				return false;
-			if(!irc.isUserVisible(args[0])) {
-				sender.sendMessage(
-						ChatColor.GOLD+"Could not find "+args[0]+" in IRC.");
-				return true;
-			}
 			for(String c : irc.getChannels())
 				irc.sendRaw(cmdVoice.replace("%channel%", c)
 									.replace("%nick%", args[0]));
-			sender.sendMessage(ChatColor.GREEN+"Voiced "+args[0]+".");
 			return true;
 		}
 		return false;
@@ -65,15 +58,9 @@ public class BridgeCmdExecutor implements CommandExecutor {
 		if(sender.hasPermission("mutinyirc.cmd.devoice")) {
 			if(args.length < 1)
 				return false;
-			if(!irc.isUserVisible(args[0])) {
-				sender.sendMessage(
-						ChatColor.GOLD+"Could not find "+args[0]+" in IRC.");
-				return true;
-			}
 			for(String c : irc.getChannels())
 				irc.sendRaw(cmdDevoice.replace("%channel%", c)
 									.replace("%nick%", args[0]));
-			sender.sendMessage(ChatColor.GREEN+"Devoiced "+args[0]+".");
 			return true;
 		}
 		return false;
@@ -83,11 +70,6 @@ public class BridgeCmdExecutor implements CommandExecutor {
 		if(sender.hasPermission("mutinyirc.cmd.kick")) {
 			if(args.length < 1)
 				return false;
-			if(!irc.isUserVisible(args[0])) {
-				sender.sendMessage(
-						ChatColor.GOLD+"Could not find "+args[0]+" in IRC.");
-				return true;
-			}
 			String reason = "("+sender.getName()+")";
 			if(args.length > 1) {
 				for(int i = 1; i < args.length; i++)
@@ -98,7 +80,6 @@ public class BridgeCmdExecutor implements CommandExecutor {
 				irc.sendRaw(cmdKick.replace("%channel%", c)
 									.replace("%nick%", args[0])
 									.replace("%reason%", reason));
-			sender.sendMessage(ChatColor.GREEN+"Kicked "+args[0]+" from IRC.");
 			return true;
 		}
 		return false;
@@ -108,11 +89,6 @@ public class BridgeCmdExecutor implements CommandExecutor {
 		if(sender.hasPermission("mutinyirc.cmd.ban")) {
 			if(args.length < 1)
 				return false;
-			if(!irc.isUserVisible(args[0])) {
-				sender.sendMessage(
-						ChatColor.GOLD+"Could not find "+args[0]+" in IRC.");
-				return true;
-			}
 			String reason = "("+sender.getName()+")";
 			if(args.length > 1) {
 				for(int i = 1; i < args.length; i++)
@@ -127,7 +103,6 @@ public class BridgeCmdExecutor implements CommandExecutor {
 									.replace("%host%", irc.getUserHost(nick))
 									.replace("%login%", irc.getUserLogin(nick))
 									);
-			sender.sendMessage(ChatColor.GREEN+"Banned "+nick+" from IRC.");
 			return true;
 		}
 		return false;
