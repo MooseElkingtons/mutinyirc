@@ -6,6 +6,7 @@ import java.util.concurrent.*;
 import java.util.logging.*;
 
 import com.miraclem4n.mchat.types.InfoType;
+
 import net.milkbowl.vault.chat.Chat;
 
 import org.bukkit.*;
@@ -239,6 +240,8 @@ public class IRC {
 			socket = null;
 			input = null;
 			output = null;
+			whos.clear();
+			channels.clear();
 			for(IRCListener l : listeners)
 				l.onDisconnect();
 		} catch(Exception e) {
@@ -246,6 +249,16 @@ public class IRC {
 					+ "disconnecting from IRC.", e);
 		}
 	}
+	
+	/**
+	 * Attempts to reconnect to IRC.
+	 */
+	public void reconnect() {
+		plugin.getLogger().log(Level.INFO, "Attempting to reconnect to IRC.");
+		disconnect();
+		connect(socket);
+	}
+
 	
 	/**
 	 * 
