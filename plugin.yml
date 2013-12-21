@@ -1,7 +1,7 @@
 name: MutinyIRC
 version: 1.0.2
 main: com.mutinycraft.irc.plugin.Plugin
-author: MooseElkingtons
+authors: [MooseElkingtons, Jigsaw]
 description: extensible IRC plugin with a simple, yet elegant design.
 website: http://dev.bukkit.org/bukkit-plugins/mutinyirc/
 softdepend: ['Vault', 'MChat', 'Factions']
