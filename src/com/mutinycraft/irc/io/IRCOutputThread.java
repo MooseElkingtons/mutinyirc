@@ -45,8 +45,10 @@ public class IRCOutputThread implements Runnable {
 					Thread.sleep(queueInterval);
 				}
 			} catch(Exception e) {
-				plugin.getLogger().log(Level.SEVERE, null, e);
+				plugin.getLogger().log(Level.SEVERE, "An error has occured in the output thread.", e);
+				irc.reconnect();
 			}
 		}
 	}
+	
 }

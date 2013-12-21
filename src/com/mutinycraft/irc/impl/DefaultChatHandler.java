@@ -4,7 +4,6 @@ import org.bukkit.event.*;
 import org.bukkit.event.player.*;
 
 import com.massivecraft.factions.P;
-
 import com.mutinycraft.irc.*;
 import com.mutinycraft.irc.plugin.Plugin;
 
@@ -68,8 +67,8 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	@Override
 	public void onJoin(String user, String login, String host,
 			String channel) {
-		if(!getIRC().getGameRelay("join") && 
-				!user.equalsIgnoreCase(getIRC().getNick()))
+		if(!getIRC().getGameRelay("join") || 
+				user.equalsIgnoreCase(getIRC().getNick()))
 			return;
 		String msg = getIRC().getGameMessage("join")
 				.replace("%user%", user)
@@ -79,14 +78,26 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	
 	@Override
 	public void onPart(String user, String channel) {
-		if(!getIRC().getGameRelay("part") && 
-				!user.equalsIgnoreCase(getIRC().getNick()))
+		if(!getIRC().getGameRelay("part") || 
+				user.equalsIgnoreCase(getIRC().getNick()))
 			return;
 		String msg = getIRC().getGameMessage("part")
 				.replace("%user%", user)
 				.replace("%channel%", channel);
 		getIRC().sendGameMessage(msg);
 	}
+	
+	@Override
+	public void onModeChanged(String channel, String user, String modes) {
+		if(!getIRC().getGameRelay("modes") || !getIRC().isChannel(channel))
+			return;
+		String msg = getIRC().getGameMessage("modes")
+				.replace("%user%", user)
+				.replace("%channel%", channel)
+				.replace("%mode%", modes);
+		getIRC().sendGameMessage(msg);
+	}
+
 	
 	@EventHandler
 	public void onGameMessage(AsyncPlayerChatEvent event) {
