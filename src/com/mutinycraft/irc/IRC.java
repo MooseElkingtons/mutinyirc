@@ -445,14 +445,16 @@ public class IRC {
 	 * @param message The message sent by the player.
 	 */
 	public void sendIrcMessage(Player player, String message) {
+		String msg = message;
 		if(player.hasPermission("mutinyirc.color"))
-			message = ChatUtil.correctCC(message);
+			msg = ChatUtil.correctCC(msg);
 		if(ircRelays.get("color"))
-			message = ChatUtil.gameToIrcColors(message);
+			msg = ChatUtil.gameToIrcColors(msg);
 		else
-			message = ChatUtil.stripGameColors(message);
-		String m = ircPrefix + formatGameMessage(player, "msg")
-				.replace("%msg%", message);
+			msg = ChatUtil.stripGameColors(msg);
+		String m = ircPrefix + ChatUtil.gameToIrcColors(
+				formatGameMessage(player, "msg"))
+				.replace("%msg%", msg);
 		for(String channel : channels.keySet())
 			sendMessage(channel, m);
 	}
