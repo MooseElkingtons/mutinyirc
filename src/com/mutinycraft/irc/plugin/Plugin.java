@@ -55,8 +55,8 @@ public class Plugin extends JavaPlugin {
 		BridgeCmdExecutor ex = new BridgeCmdExecutor(irc, this);
 		getCommand("voice").setExecutor(ex);
 		getCommand("devoice").setExecutor(ex);
-		getCommand("kick").setExecutor(ex);
-		getCommand("ban").setExecutor(ex);
+		getCommand("irckick").setExecutor(ex);
+		getCommand("ircban").setExecutor(ex);
 	}
 	
 	private void loadConfig() {

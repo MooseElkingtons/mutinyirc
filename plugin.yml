@@ -15,11 +15,11 @@ commands:
         description: This removes voice from the specified user in IRC.
         usage: /devoice <nick>
         permission: mutinyirc.cmd.devoice
-    kick:
+    irckick:
         description: This kicks the user from the IRC channel(s).
         usage: /kick <nick> [reason]
         permission: mutinyirc.cmd.kick
-    ban:
+    ircban:
         description: This bans the user from the IRC channel(s).
         usage: /ban <nick> [reason]
         permission: mutinyirc.cmd.ban

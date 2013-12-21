@@ -33,9 +33,9 @@ public class BridgeCmdExecutor implements CommandExecutor {
 				return voice(sender, args);
 			case "devoice":
 				return devoice(sender, args);
-			case "kick":
+			case "irckick":
 				return kick(sender, args);
-			case "ban":
+			case "ircban":
 				return ban(sender, args);
 			default:
 				return false;
