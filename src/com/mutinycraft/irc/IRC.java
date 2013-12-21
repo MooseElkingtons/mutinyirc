@@ -203,8 +203,7 @@ public class IRC {
 		List<String> msgs = new ArrayList<String>();
 		for(int i = 0; i < message.length(); i+=clen)
 			msgs.add(message
-					.substring(i, Math.min(message.length(), i + clen))
-					.replaceAll("(\r|\n)", " "));
+					.substring(i, Math.min(message.length(), i + clen)));
 		for(String s : msgs)
 			sendRaw(preCmd+s);
 	}

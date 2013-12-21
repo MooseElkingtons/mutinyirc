@@ -153,7 +153,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 			return;
 		String reason = "No reason";
 		if(event.getReason() != null)
-			reason = event.getReason();
+			reason = event.getReason().replaceAll("(\r|\n)", " ");
 		String msg = getIRC().formatGameMessage(event.getPlayer(), "kick");
 		getIRC().sendIrcMessage(msg.replace("%reason%", reason));
 	}
