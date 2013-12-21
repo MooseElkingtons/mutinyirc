@@ -197,13 +197,12 @@ public class IRC {
 	 * @param message The message to send.
 	 */
 	public void sendMessage(String recipient, String message) {
-		String msg = message.replace("\r\n", " ");
 		recipient = recipient.replace(":", "");
 		String preCmd = "PRIVMSG "+recipient+" :";
 		int clen = 420 - preCmd.length() - recipient.length();
 		List<String> msgs = new ArrayList<String>();
 		for(int i = 0; i < message.length(); i+=clen)
-			msgs.add(msg
+			msgs.add(message
 					.substring(i, Math.min(message.length(), i + clen)));
 		for(String s : msgs)
 			sendRaw(preCmd+s);
@@ -435,6 +434,25 @@ public class IRC {
 		String m = ircPrefix + 
 			(ircRelays.get("color") ? ChatUtil.gameToIrcColors(message)
 			: ChatUtil.stripGameColors(message));
+		for(String channel : channels.keySet())
+			sendMessage(channel, m);
+	}
+	
+	/**
+	 * Sends a properly formatted Game Message to IRC.
+	 * 
+	 * @param player The player who sent the message.
+	 * @param message The message sent by the player.
+	 */
+	public void sendIrcMessage(Player player, String message) {
+		if(player.hasPermission("mutinyirc.color"))
+			message = ChatUtil.correctCC(message);
+		if(ircRelays.get("color"))
+			message = ChatUtil.gameToIrcColors(message);
+		else
+			message = ChatUtil.stripGameColors(message);
+		String m = ircPrefix + formatGameMessage(player, "msg")
+				.replace("%msg%", message);
 		for(String channel : channels.keySet())
 			sendMessage(channel, m);
 	}

@@ -1,5 +1,6 @@
 package com.mutinycraft.irc.impl;
 
+import org.bukkit.entity.Player;
 import org.bukkit.event.*;
 import org.bukkit.event.player.*;
 
@@ -103,13 +104,12 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	public void onGameMessage(AsyncPlayerChatEvent event) {
 		if(!getIRC().getIrcRelay("msg"))
 			return;
+		Player p = event.getPlayer();
 		if(getPlugin().isFactionsEnabled()
-				&& P.p.isPlayerFactionChatting(event.getPlayer()))
+				&& P.p.isPlayerFactionChatting(p))
 			return;
-		String sender = getIRC().formatGameMessage(event.getPlayer(), "msg");
 		String message = event.getMessage();
-		String msg = sender.replace("%msg%", message);
-		getIRC().sendIrcMessage(msg);		
+		getIRC().sendIrcMessage(p, message);
 	}
 	
 	@EventHandler
