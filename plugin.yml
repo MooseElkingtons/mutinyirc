@@ -23,3 +23,7 @@ commands:
         description: This bans the user from the IRC channel(s).
         usage: /ban <nick> [reason]
         permission: mutinyirc.cmd.ban
+    ircreload:
+        description: This reloads the specified argument.
+        usage: /ircreload <argument>
+        permission: mutinyirc.reload

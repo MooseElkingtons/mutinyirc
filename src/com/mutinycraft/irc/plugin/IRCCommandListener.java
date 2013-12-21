@@ -17,9 +17,9 @@ public class IRCCommandListener extends IRCListener implements Listener {
 
 	private String cmdPrefix = ".";
 	
-	public IRCCommandListener(IRC irc, Plugin plugin) {
+	public IRCCommandListener(IRC irc, Plugin plugin, String prefix) {
 		super(irc, plugin);
-		cmdPrefix = plugin.getConfig().getString("config.command_prefix");
+		cmdPrefix = prefix;
 	}
 	
 	@Override
@@ -48,5 +48,9 @@ public class IRCCommandListener extends IRCListener implements Listener {
 				return;
 			}
 		}
-	}	
+	}
+	
+	public void setCommandPrefix(String prefix) {
+		cmdPrefix = prefix;
+	}
 }

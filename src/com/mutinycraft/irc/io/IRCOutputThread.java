@@ -19,7 +19,8 @@ public class IRCOutputThread implements Runnable {
 	private IRC irc;
 	private int queueInterval = 750;
 	
-	public IRCOutputThread(Plugin plugin, Socket socket, IRC irc) {
+	public IRCOutputThread(Plugin plugin, Socket socket, IRC irc,
+			int interval) {
 		this.plugin = plugin;
 		try {
 			this.out = new BufferedWriter(
@@ -29,11 +30,18 @@ public class IRCOutputThread implements Runnable {
 					+ "Stream from IRC socket.", e);
 		}
 		this.irc = irc;
-		queueInterval = plugin.getConfig().getInt("config.message_interval");
+		queueInterval = interval;
 	}
 	
 	@Override
 	public void run() {
+		while(irc.isQueueBlocked()) {
+			try {
+				Thread.sleep(1000);
+			} catch(Exception e) {
+				plugin.getLogger().log(Level.SEVERE, null, e);
+			}
+		}
 		while(irc.isConnected()) {
 			try {
 				String o = irc.queue.poll();
@@ -41,14 +49,16 @@ public class IRCOutputThread implements Runnable {
 					if(plugin.isEVerbose())
 						plugin.getLogger().log(Level.INFO, ">>> "+o);
 					out.write(o+"\r\n");
-					out.flush();
+					if(!irc.getSocket().isClosed())
+						out.flush();
 					Thread.sleep(queueInterval);
 				}
 			} catch(Exception e) {
-				plugin.getLogger().log(Level.SEVERE, "An error has occured in the output thread.", e);
-				irc.reconnect();
+				plugin.getLogger().log(Level.SEVERE, "An error has occured "
+						+ "in the output thread.", e);
 			}
 		}
+		irc.outEnded();
 	}
 	
 }

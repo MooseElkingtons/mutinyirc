@@ -41,6 +41,7 @@ public class IRC {
 
 	
 	private Plugin plugin;
+	private IRCCommandListener cmdListener;
 	private List<IRCListener> listeners = new ArrayList<IRCListener>();
 	private HashMap<String, IRCUser> bufferNam = new HashMap<String, IRCUser>();
 	private Socket socket = null;
@@ -50,7 +51,9 @@ public class IRC {
 	private String pass = null;
 	private String server = "";
 	private int port = 6667;
+	private int queueInterval = 750;
 	private int triedNicks = 0;
+	private boolean blockQueue = false;
 	private HashMap<String, List<IRCUser>> channels = new HashMap<String,
 			List<IRCUser>>();
 	private HashMap<String, String> whos = new HashMap<String, String>();
@@ -61,9 +64,10 @@ public class IRC {
 		loadStartupCommands();
 		loadConfig();
 		this.registerIRCListener(new ControlListener(this, plugin));
-		IRCCommandListener gl = new IRCCommandListener(this, plugin);
-		this.registerIRCListener(gl);
-		plugin.getServer().getPluginManager().registerEvents(gl, plugin);
+		cmdListener = new IRCCommandListener(this, plugin, cmdPrefix);
+		this.registerIRCListener(cmdListener);
+		plugin.getServer().getPluginManager().registerEvents(cmdListener,
+				plugin);
 
 	}
 	
@@ -80,6 +84,8 @@ public class IRC {
 		gameRelays.clear();
 		ircRelays.clear();
 		FileConfiguration cfg = plugin.getConfig();
+		cmdPrefix = cfg.getString("config.command_prefix");
+		queueInterval = cfg.getInt("config.message_interval");
 		String imsg = "irc_to_game.messages.";
 		gameMsgs.put("join",
 				ChatUtil.ircToGameColors(ChatUtil.correctCC(
@@ -214,7 +220,7 @@ public class IRC {
 	 * @param rawLine The raw line to send to IRC.
 	 */
 	public void sendRaw(String rawLine) {
-		if(!isConnected())
+		if(!isConnected() || blockQueue)
 			return;
 		queue.add(rawLine);
 	}
@@ -236,6 +242,8 @@ public class IRC {
 		if(!isConnected())
 			return;
 		try {
+			blockQueue = true;
+			queue.clear();
 			socket.close();
 			socket = null;
 			input = null;
@@ -256,7 +264,12 @@ public class IRC {
 	public void reconnect() {
 		plugin.getLogger().log(Level.INFO, "Attempting to reconnect to IRC.");
 		disconnect();
-		connect(socket);
+		try {
+			connect(new Socket(server, port));
+		} catch (Exception e) {
+			plugin.getLogger().log(Level.SEVERE, "There was an error while "
+					+ "trying to reconnect to IRC", e);
+		}
 	}
 
 	
@@ -265,7 +278,21 @@ public class IRC {
 	 * @return whether or not the IRC bridge is connected to any IRC server.
 	 */
 	public boolean isConnected() {
-		return socket != null && socket.isConnected();
+		return socket != null && !blockQueue &&
+				socket.isConnected();
+	}
+	
+	public void outEnded() {
+		blockQueue = false;
+	}
+	
+	/**
+	 * Gets the IRC socket.
+	 * 
+	 * @return The IRC socket.
+	 */
+	public Socket getSocket() {
+		return socket;
 	}
 	
 	/**
@@ -279,8 +306,9 @@ public class IRC {
 		this.socket = socket;
 		server = socket.getInetAddress().getHostAddress();
 		port = socket.getPort();
+		output = new Thread(new IRCOutputThread(plugin, socket, this,
+				queueInterval));
 		input = new Thread(new IRCInputThread(plugin, socket, this));
-		output = new Thread(new IRCOutputThread(plugin, socket, this));
 		input.start();
 		output.start();
 		for(IRCListener l : listeners)
@@ -326,7 +354,10 @@ public class IRC {
 	 * @return The hostname
 	 */
 	public String getUserHost(String nick) {
-		return whos.get(nick.toLowerCase()).split("@")[1];
+		String n = nick.toLowerCase();
+		if(whos.containsKey(n))
+			return whos.get(n).split("@")[1];
+		return "";
 	}
 	
 	/**
@@ -336,9 +367,15 @@ public class IRC {
 	 * @return The login name
 	 */
 	public String getUserLogin(String nick) {
-		return whos.get(nick.toLowerCase()).split("@")[0];
+		if(whos.containsKey(nick.toLowerCase()))
+			return whos.get(nick.toLowerCase()).split("@")[0];
+		return "";
 	}
-
+	
+	public HashMap<String, String> getWho() {
+		return whos;
+	}
+	
 	/**
 	 * Checks if the IRC bridge is in a same channel as the specified user.
 	 * 
@@ -500,6 +537,14 @@ public class IRC {
 	
 	public String getGameMsgPrefix() {
 		return gamePrefix;
+	}
+	
+	public IRCCommandListener getCommandListener() {
+		return cmdListener;
+	}
+	
+	public boolean isQueueBlocked() {
+		return blockQueue;
 	}
 	
 	public String formatGameMessage(Player player, String type) {
@@ -715,9 +760,9 @@ public class IRC {
 					break;
 					
 				case ReplyConstants.RPL_WHOREPLY:
-					String wnick = res[5].toLowerCase();
-					String whost = res[3];
-					String wlogin = res[2];
+					String wnick = res[6].toLowerCase();
+					String whost = res[4];
+					String wlogin = res[3];
 					if(whos.containsKey(wnick))
 						whos.remove(wnick);
 					whos.put(wnick, wlogin+"@"+whost);

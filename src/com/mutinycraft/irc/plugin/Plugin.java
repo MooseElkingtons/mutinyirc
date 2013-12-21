@@ -32,6 +32,7 @@ public class Plugin extends JavaPlugin {
 		
 		irc = new IRC(this);
 		loadConfig();
+		loadSoftDependencies();
 		loadHandlers();
 		getLogger().log(Level.INFO, "Starting IRC connection to "+server+".");
 		try {
@@ -57,9 +58,10 @@ public class Plugin extends JavaPlugin {
 		getCommand("devoice").setExecutor(ex);
 		getCommand("irckick").setExecutor(ex);
 		getCommand("ircban").setExecutor(ex);
+		getCommand("ircreload").setExecutor(ex);
 	}
 	
-	private void loadConfig() {
+	public void loadConfig() {
 		saveDefaultConfig();
 		irc.setNick(getConfig().getString("config.nick"));
 		if(getConfig().contains("config.pass"))
@@ -71,7 +73,9 @@ public class Plugin extends JavaPlugin {
 		verbose = getConfig().getBoolean("config.verbose");
 		if(getConfig().contains("config.extra_verbose"))
 			everbose = getConfig().getBoolean("config.extra_verbose");
-		
+	}
+	
+	private void loadSoftDependencies() {
 		isVaultEnabled = getServer().getPluginManager().isPluginEnabled("Vault");
         if(isVaultEnabled){
             isVaultEnabled = getConfig().getBoolean("advanced.vault_support", true);
