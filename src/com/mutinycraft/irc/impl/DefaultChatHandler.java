@@ -89,6 +89,11 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	}
 	
 	@Override
+	public void onQuit(String user, String reason) {
+		onPart(user, "");
+	}
+	
+	@Override
 	public void onModeChanged(String channel, String user, String modes) {
 		if(!getIRC().getGameRelay("modes") || !getIRC().isChannel(channel))
 			return;
