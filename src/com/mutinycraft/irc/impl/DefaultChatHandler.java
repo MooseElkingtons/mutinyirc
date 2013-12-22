@@ -107,7 +107,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	
 	@EventHandler(priority = EventPriority.LOW)
 	public void onGameMessage(AsyncPlayerChatEvent event) {
-		if(!getIRC().getIrcRelay("msg"))
+		if(!getIRC().getIrcRelay("msg") || event.isCancelled())
 			return;
 		Player p = event.getPlayer();
 		if(getPlugin().isFactionsEnabled()
