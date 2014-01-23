@@ -27,7 +27,8 @@ import com.mutinycraft.irc.plugin.*;
 
 public class IRC {
 	
-	public ConcurrentLinkedQueue<String> queue =
+	/** Queue of messages to be sent to IRC */
+	public final ConcurrentLinkedQueue<String> queue =
 			new ConcurrentLinkedQueue<String>();
 	
 	private HashMap<String, String>
@@ -53,7 +54,14 @@ public class IRC {
 	private int port = 6667;
 	private int queueInterval = 750;
 	private int triedNicks = 0;
-	private boolean blockQueue = false;
+	/**
+	 * Whether or not the connection is currently closing and the queue should
+	 * be artificially blocked.
+	 * Since this flag is read and updated by multiple threads (the main
+	 * {@link Plugin} thread and {@link #output}), it should be kept volatile
+	 * unless a lock is put in place.
+	 */
+	private volatile boolean blockQueue = false;
 	private HashMap<String, List<IRCUser>> channels = new HashMap<String,
 			List<IRCUser>>();
 	private HashMap<String, String> whos = new HashMap<String, String>();
@@ -223,7 +231,14 @@ public class IRC {
 		if(!isConnected() || blockQueue)
 			return;
 		queue.add(rawLine);
+		// Purely for signalling, since queue is a java.util.concurrent
+		synchronized(queueSignal) {
+			queueSignal.notify();
+		}
 	}
+
+	/** Queue signalling object, waiting threads will be notified when the queue gains new messages. */
+	public final Object queueSignal = new Object();
 	
 	/**
 	 * Sends Client-to-Client Protocol (CTCP) query to specified recipient.
@@ -247,6 +262,9 @@ public class IRC {
 			socket.close();
 			socket = null;
 			input = null;
+			// Signal to stop waiting for more output
+			output.interrupt();
+			// Assume thread exits in a timely manner without .join()ing
 			output = null;
 			whos.clear();
 			channels.clear();

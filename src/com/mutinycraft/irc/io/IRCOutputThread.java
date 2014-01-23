@@ -35,17 +35,21 @@ public class IRCOutputThread implements Runnable {
 	
 	@Override
 	public void run() {
-		while(irc.isQueueBlocked()) {
-			try {
+		try {
+			while(irc.isQueueBlocked()) {
+				// You could probably replace this by notifications as well,
+				// but it's not causing much trouble as it stands.
 				Thread.sleep(1000);
-			} catch(Exception e) {
-				plugin.getLogger().log(Level.SEVERE, null, e);
 			}
-		}
-		while(irc.isConnected()) {
-			try {
-				String o = irc.queue.poll();
-				if(o != null && !o.isEmpty()) {
+			while(irc.isConnected()) {
+				// assume irc's queue is still thread-safe
+				final String o = irc.queue.poll();
+				if(o == null)
+					synchronized(irc.queueSignal) {
+						irc.queueSignal.wait();
+						continue;
+					}
+				if(!o.isEmpty()) {
 					if(plugin.isEVerbose())
 						plugin.getLogger().log(Level.INFO, ">>> "+o);
 					out.write(o+"\r\n");
@@ -53,12 +57,22 @@ public class IRCOutputThread implements Runnable {
 						out.flush();
 					Thread.sleep(queueInterval);
 				}
-			} catch(Exception e) {
-				plugin.getLogger().log(Level.SEVERE, "An error has occured "
-						+ "in the output thread.", e);
 			}
+		} catch(final InterruptedException ix) {
+			// respect interruption request: Exit thread
+			Thread.currentThread().interrupt();
+		} catch(final IOException iox) {
+			// I don't believe there's much we can try after receiving an
+			// IOException, let's just exit.
+			plugin.getLogger().log(Level.SEVERE, "{0}", iox);
 		}
-		irc.outEnded();
+		// I don't know what the intention behind catch-alls was, but I
+		// omitted them since the checked exceptions should cover all
+		// reasonable cases.
+		finally
+		{
+			irc.outEnded();
+		}
 	}
-	
 }
+
