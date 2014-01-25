@@ -45,7 +45,7 @@ public class IRCCommandListener extends IRCListener implements Listener {
 						plist = plist.substring(0, plist.lastIndexOf(','));
 					}
 					getIRC().sendMessage(channel, plist);
-				return;
+				break;
 			}
 		}
 	}

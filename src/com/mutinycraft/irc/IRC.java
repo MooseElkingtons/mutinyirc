@@ -49,6 +49,7 @@ public class IRC {
 	private Thread input = null, output = null;
 	
 	private String nick = "MutinyIRC";
+	private String ourHost = "";
 	private String pass = null;
 	private String server = "";
 	private int port = 6667;
@@ -213,7 +214,8 @@ public class IRC {
 	public void sendMessage(String recipient, String message) {
 		recipient = recipient.replace(":", "");
 		String preCmd = "PRIVMSG "+recipient+" :";
-		int clen = 420 - preCmd.length() - recipient.length();
+		int clen = 495 - ourHost.length()
+				- recipient.length() - (nick.length() * 2);
 		List<String> msgs = new ArrayList<String>();
 		for(int i = 0; i < message.length(); i+=clen)
 			msgs.add(message
@@ -311,6 +313,15 @@ public class IRC {
 	 */
 	public Socket getSocket() {
 		return socket;
+	}
+	
+	/**
+	 * Returns our host mask.
+	 * 
+	 * @return The host mask.
+	 */
+	public String getOurHost() {
+		return ourHost;
 	}
 	
 	/**
@@ -718,10 +729,22 @@ public class IRC {
 					for(String chan : clist) {
 						chanlist += chan + ",";
 					}
+					sendRaw("USERHOST "+nick);
 					sendRaw("JOIN "+chanlist.substring(0,
 							chanlist.lastIndexOf(',')));
 					for(String chan : clist) {
 						sendRaw("WHO "+chan);
+					}
+					break;
+				
+				case ReplyConstants.RPL_USERHOST:
+					String[] resh = response.split("@");
+					if(resh.length > 1) {
+						String host = resh[1].trim();
+						ourHost = MiscUtil.getHostName(host);
+						if(plugin.isVerbose())
+							plugin.getLogger().log(Level.INFO, "Our hostname is "
+									+ourHost);
 					}
 					break;
 			
