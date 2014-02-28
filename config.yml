@@ -42,6 +42,7 @@ game_to_irc:
         kick: "%dname%&r was kicked (%reason%)."
         msg: "<%nf%&r> %msg%"
         me: "&7* %dname%&r %action%"
+        say: "&d[%name%] %msg%"
     relay:
         join: true
         part: true
@@ -49,6 +50,7 @@ game_to_irc:
         msg: true
         me: true
         color: true
+        say: true
 
 advanced:
     vault_support: true
@@ -61,3 +63,4 @@ advanced:
         command_ban: "MODE %channel% +b *!*@%host%\r\nKICK %channel% %nick% :%reason%"
     handlers:
         - "DefaultChatHandler"
+        - "BroadcastHandler"

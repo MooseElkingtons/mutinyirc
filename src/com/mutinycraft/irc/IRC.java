@@ -18,6 +18,8 @@ import com.miraclem4n.mchat.api.*;
 import com.mutinycraft.irc.io.*;
 import com.mutinycraft.irc.IRCUser.*;
 import com.mutinycraft.irc.plugin.*;
+import static com.mutinycraft.irc.ChatUtil.gameToIrcColors;
+import static com.mutinycraft.irc.ChatUtil.correctCC;
 
 /**
  * RFC-2812 compliant IRC bridge.
@@ -31,11 +33,15 @@ public class IRC {
 	public final ConcurrentLinkedQueue<String> queue =
 			new ConcurrentLinkedQueue<String>();
 	
+	/** Configurable message formats to show on IRC about things happening in-game, like joining or leaving of players */
+	private final HashMap<String, String>
+		ircMsgs = new HashMap<String, String>();
 	private HashMap<String, String>
-		ircMsgs = new HashMap<String, String>(),
 		gameMsgs = new HashMap<String, String>();
+	/** Whether or not to relay certain things happening in-game to IRC */
+	private final HashMap<String, Boolean>
+		ircRelays = new HashMap<String, Boolean>();
 	private HashMap<String, Boolean>
-		ircRelays = new HashMap<String, Boolean>(),
 		gameRelays = new HashMap<String, Boolean>();
 	private String cmdPrefix = ".", ircPrefix = "",
 					gamePrefix = "", nameFormat = "";
@@ -43,7 +49,8 @@ public class IRC {
 	
 	private Plugin plugin;
 	private IRCCommandListener cmdListener;
-	private List<IRCListener> listeners = new ArrayList<IRCListener>();
+	/** List of IRCListeners, who all may perform some action on certain events */
+	private final List<IRCListener> listeners = new ArrayList<IRCListener>();
 	private HashMap<String, IRCUser> bufferNam = new HashMap<String, IRCUser>();
 	private Socket socket = null;
 	private Thread input = null, output = null;
@@ -87,6 +94,9 @@ public class IRC {
 			loadship.addAll(cfg.getStringList("config.startup_commands"));
 	}
 	
+	/**
+	 * Loads the custom message formats from the configuration file
+	 */
 	public void loadConfig() {
 		gameMsgs.clear();
 		ircMsgs.clear();
@@ -129,6 +139,9 @@ public class IRC {
 				ChatUtil.correctCC(cfg.getString(gmsg+"msg"))));
 		ircMsgs.put("me", ChatUtil.gameToIrcColors(
 				ChatUtil.correctCC(cfg.getString(gmsg+"me"))));
+		// Missing from many older configuration files, likely to be null.
+		final /*@CanBeNull*/ String gmsgsay = cfg.getString(gmsg+"say");
+		ircMsgs.put("say", gmsgsay==null?"":gameToIrcColors(correctCC(gmsgsay)));
 
 		String irel = "irc_to_game.relay.";
 		gameRelays.put("join", cfg.getBoolean(irel+"join"));
@@ -147,6 +160,7 @@ public class IRC {
 		ircRelays.put("msg", cfg.getBoolean(grel+"msg"));
 		ircRelays.put("me", cfg.getBoolean(grel+"me"));
 		ircRelays.put("color", cfg.getBoolean(grel+"color"));
+		ircRelays.put("say", cfg.getBoolean(grel+"say"));
 		
 		cmdPrefix = cfg.getString("config.command_prefix");
 		ircPrefix = ChatUtil.gameToIrcColors(
@@ -479,9 +493,10 @@ public class IRC {
 	public void setPass(String pass) {
 		this.pass = pass;
 	}
-	
+
 	/**
-	 * Registers an IRCListener to the IRC bridge.
+	 * Registers an IRCListener to the IRC bridge. Does not guard against double registrations.
+	 * @param listener the new listener to add.
 	 */
 	public void registerIRCListener(IRCListener listener) {
 		listeners.add(listener);
@@ -540,7 +555,12 @@ public class IRC {
 			plugin.getServer().getConsoleSender().sendMessage(m);
 	}
 	
-	public String getIrcMessage(String key) {
+	/**
+	 * Gets the message related to the given in-game event
+	 * @param key Key of the in-game event for which to retrieve the IRC message
+	 * @return The format of the message to be displayed on IRC signaling the in-game event. Null if no such key.
+	 */
+	public /*@CanBeNull*/ String getIrcMessage(String key) {
 		return ircMsgs.get(key);
 	}
 	
@@ -576,6 +596,12 @@ public class IRC {
 		return blockQueue;
 	}
 	
+	/**
+	 * formats an event-message to be displayed on IRC, replacing variables and colour codes.
+	 * @param player Which players caused the event
+	 * @param type the event key
+	 * @return A string in IRC format
+	 */
 	public String formatGameMessage(Player player, String type) {
 		String name = player.getName();
 		World world = player.getWorld();
@@ -613,6 +639,30 @@ public class IRC {
 		return ChatUtil.alltrim(ChatUtil.correctCC(fname));
 	}
 	
+	/**
+	 * formats an event-message to be displayed on IRC, replacing variables and colour codes.
+	 * Since this overload does not take a player object, player-related variables such as {@code %world%} and faction codes are not replaced.
+	 * @param type the event key
+	 * @param senderName the Name from which to send this message. Command Blocks and other unknowns may be {@literal @}, Console is {@literal Server} and players have their player name. 
+	 * @param message The message to be formatted.
+	 * @return A string in IRC format
+	 */
+	public String formatGameMessage(final String type, final String senderName, final String message)
+	{
+		if(message == null) throw new IllegalArgumentException("message was null");
+		if(senderName == null) throw new IllegalArgumentException("sender name was null");
+		if(type == null) throw new IllegalArgumentException("event key was null");
+
+		final /*@CanBeNull*/ String ircFormat = getIrcMessage(type);
+		if(ircFormat==null) throw new IllegalArgumentException("No game message format for "+type);
+
+		return ChatUtil.alltrim(ChatUtil.correctCC(ircFormat
+				.replace("%nf%", nameFormat)
+				.replace("%name%", senderName)
+				.replace("%dname%", senderName)
+				.replace("%msg%", message)));
+	}
+
 	public String toGameColor(String message) {
 		return gameRelays.get("color") ? ChatUtil.ircToGameColors(message) :
 				ChatUtil.stripIrcColors(message);

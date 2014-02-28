@@ -18,7 +18,7 @@ import com.mutinycraft.irc.impl.*;
 public class Plugin extends JavaPlugin {
 	
 	private Chat chat;
-	private IRC irc;
+	private /*@CanBeNull*/ IRC irc;
 	private String server = "";
 	private int port = 6667;
 	private boolean verbose = false, everbose = false,
@@ -47,6 +47,11 @@ public class Plugin extends JavaPlugin {
 	
 	@Override
 	public void onDisable() {
+		if(irc==null)
+		{
+			getLogger().log(Level.INFO, "No need to disconnect; Error on startup.");
+			return;
+		}
 		getLogger().log(Level.INFO, "Disconnecting from IRC.");
 		irc.disconnect();
 		getLogger().log(Level.INFO, "MutinyIRC Plugin Disabled.");
@@ -154,6 +159,10 @@ public class Plugin extends JavaPlugin {
 		return chat;
 	}
 	
+	/**
+	 * Loads/registers the pluggable IRCListeners specified in the configuration file. Does not unregister them anywhere first.
+	 * @throws IllegalArgumentException if one of the listeners in the configuration file is not recognised.
+	 */
 	public void loadHandlers() throws IllegalArgumentException {
 		FileConfiguration cfg = getConfig();
 		listeners.addAll(cfg.getStringList("advanced.handlers"));
@@ -166,7 +175,12 @@ public class Plugin extends JavaPlugin {
 					irc.registerIRCListener(dch);
 					getServer().getPluginManager().registerEvents(dch, this);
 					break;
-				
+				case "BroadcastHandler":
+					getLogger().log(Level.INFO, "Registering Broadcast Handler");
+					final BroadcastHandler bch = new BroadcastHandler(irc,this);
+					irc.registerIRCListener(bch);
+					getServer().getPluginManager().registerEvents(bch,this);
+					break;
 				default:
 					throw new IllegalArgumentException("Unknown Extension "+s);
 			}
