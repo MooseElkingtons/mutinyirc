@@ -105,7 +105,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 	}
 
 	
-	@EventHandler
+	@EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
 	public void onGameMessage(AsyncPlayerChatEvent event) {
 		if(!getIRC().getIrcRelay("msg") || event.isCancelled())
 			return;
@@ -117,7 +117,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		getIRC().sendIrcMessage(p, message);
 	}
 	
-	@EventHandler
+	@EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
 	public void onGameMe(PlayerCommandPreprocessEvent event) {
 		if(!getIRC().getIrcRelay("me"))
 			return;
@@ -136,7 +136,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		}
 	}
 	
-	@EventHandler
+	@EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
 	public void onGameJoin(PlayerJoinEvent event) {
 		if(!getIRC().getIrcRelay("join"))
 			return;
@@ -144,7 +144,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		getIRC().sendIrcMessage(msg);
 	}
 	
-	@EventHandler
+	@EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
 	public void onGameQuit(PlayerQuitEvent event) {
 		if(!getIRC().getIrcRelay("part"))
 			return;
@@ -152,7 +152,7 @@ public class DefaultChatHandler extends IRCListener implements Listener {
 		getIRC().sendIrcMessage(msg);
 	}
 	
-	@EventHandler
+	@EventHandler(ignoreCancelled=true, priority=EventPriority.MONITOR)
 	public void onPlayerKick(PlayerKickEvent event) {
 		if(!getIRC().getIrcRelay("kick"))
 			return;
